@@ -565,6 +565,8 @@ function recommendation(id, score, role, why, allocation, caution, priority = "C
 
 function buildPortfolio(profile) {
   const { spend, preference, simpleMode, totalSpend } = profile;
+  if (totalSpend <= 0) return [];
+
   const items = [];
   const category = largestCategory(spend);
   const onlineRetail = Math.max(0, spend.online);
@@ -746,6 +748,23 @@ function renderPortfolio(event) {
   appState.lastPortfolio = portfolioMarkdown(profile, items);
 
   const title = profile.userName ? `${escapeHtml(profile.userName)}'s card portfolio` : "Tailored card portfolio";
+  if (profile.totalSpend <= 0) {
+    selectors.portfolioOutput.innerHTML = `
+      <div class="portfolio-hero">
+        <div>
+          <p class="eyebrow">Tailored recommendation</p>
+          <h2>${title}</h2>
+        </div>
+        <p>Enter spend values to generate a recommended setup.</p>
+      </div>
+      <div class="portfolio-overview" aria-label="Portfolio summary">
+        <span><strong>No spend entered</strong></span>
+        <span><strong>${escapeHtml(preferenceLabel(profile.preference))}</strong> reward style</span>
+      </div>
+    `;
+    return;
+  }
+
   selectors.portfolioOutput.innerHTML = `
     <div class="portfolio-hero">
       <div>
@@ -812,13 +831,9 @@ function downloadPortfolio() {
 function resetProfile() {
   if (!selectors.portfolioForm) return;
   selectors.portfolioForm.reset();
-  document.querySelector('[data-spend="online"]').value = 1000;
-  document.querySelector('[data-spend="contactless"]').value = 800;
-  document.querySelector('[data-spend="dining"]').value = 500;
-  document.querySelector('[data-spend="travel"]').value = 300;
-  document.querySelector('[data-spend="groceries"]').value = 400;
-  document.querySelector('[data-spend="transport"]').value = 200;
-  document.querySelector('[data-spend="overseas"]').value = 0;
+  document.querySelectorAll("[data-spend]").forEach((input) => {
+    input.value = "";
+  });
   renderPortfolio();
 }
 
