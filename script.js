@@ -317,7 +317,7 @@ function profileValues() {
   });
 
   return {
-    clientName: document.querySelector("#client-name").value.trim(),
+    userName: document.querySelector("#user-name").value.trim(),
     preference: document.querySelector("#reward-preference").value,
     simpleMode: document.querySelector("#simple-mode").checked,
     spend,
@@ -329,126 +329,198 @@ function findCard(id) {
   return allCards().find((card) => card.card_id === id);
 }
 
-function addRecommendation(items, id, why, allocation, caution) {
+function money(value) {
+  return `S$${Math.max(0, Math.round(value)).toLocaleString("en-SG")}`;
+}
+
+function cardCountLabel(count) {
+  return `${count} ${count === 1 ? "card" : "cards"}`;
+}
+
+function spendAmount(spend, keys) {
+  return keys.reduce((sum, key) => sum + Number(spend[key] || 0), 0);
+}
+
+function largestCategory(spend) {
+  return [
+    { key: "dining", label: "Dining", value: spend.dining, category: "Dining" },
+    { key: "travel", label: "Travel", value: spend.travel, category: "Travel" },
+    { key: "transport", label: "Transport", value: spend.transport, category: "Transport" },
+    { key: "groceries", label: "Family/groceries", value: spend.groceries, category: "Family" },
+  ].sort((a, b) => b.value - a.value)[0];
+}
+
+function preferenceLabel(value) {
+  if (value === "cashback") return "Cashback first";
+  if (value === "balanced") return "Balanced";
+  return "Miles first";
+}
+
+function addRecommendation(items, recommendation) {
+  if (!recommendation?.card || items.some((item) => item.card.card_id === recommendation.card.card_id)) return;
+  items.push(recommendation);
+}
+
+function recommendation(id, score, role, why, allocation, caution, priority = "Core") {
   const card = findCard(id);
-  if (!card || items.some((item) => item.card.card_id === id)) return;
-  items.push({ card, why, allocation, caution });
+  if (!card) return null;
+  return { card, score, role, why, allocation, caution, priority };
 }
 
 function buildPortfolio(profile) {
   const { spend, preference, simpleMode, totalSpend } = profile;
   const items = [];
+  const category = largestCategory(spend);
+  const onlineRetail = Math.max(0, spend.online);
+  const onlineOverflow = Math.max(0, spend.online - 1000);
+  const mobileContactless = spendAmount(spend, ["contactless", "transport"]);
+  const shoppingSpend = Math.max(spend.online, 0) + Math.max(spend.groceries, 0);
+  const cashbackSpend = spendAmount(spend, ["groceries", "transport", "online", "overseas"]);
+  const wantsCashback = preference === "cashback";
+  const wantsMiles = preference === "miles";
+  const wantsBalanced = preference === "balanced";
 
-  if (preference === "cashback") {
-    addRecommendation(
-      items,
+  const candidates = [];
+
+  if (wantsCashback || wantsBalanced) {
+    const clearsMinimum = cashbackSpend >= 500;
+    candidates.push(recommendation(
       "citi-smrt",
-      "Cashback-first setup for groceries, online shopping, transport and MYR spend.",
-      "Use when the monthly statement spend can clear the S$500 minimum.",
-      "Do not treat wallet top-ups or travel-related online transactions as bonus spend."
-    );
-    return items;
+      Math.min(cashbackSpend, 1200) + (wantsCashback ? 900 : 150) + (clearsMinimum ? 250 : -350),
+      "Cashback essentials",
+      clearsMinimum
+        ? "Best fit for a cashback-first user with enough groceries, online, MYR or commute spend to clear the S$500 minimum."
+        : "Only a partial fit because the user may not clear the S$500 statement-month minimum reliably.",
+      clearsMinimum
+        ? `Put about ${money(Math.min(cashbackSpend, 1200))} of groceries, online shopping, MYR or commute spend here.`
+        : "Use only if the user can reliably reach S$500 statement-month spend; otherwise keep this as optional.",
+      "Do not count wallet top-ups or travel-related online transactions towards bonus cashback.",
+      wantsCashback ? "Core" : "Optional"
+    ));
   }
 
-  if (simpleMode || totalSpend > 4500) {
-    addRecommendation(
-      items,
-      "krisflyer-uob",
-      "Simple direct-KrisFlyer fallback when the client dislikes juggling caps or regularly exceeds 4 mpd buckets.",
-      "Use after specialised 4 mpd caps are filled, or as the main card for simplicity-first clients.",
-      "Requires S$1,000 annual SIA Group spend to unlock accelerated categories."
-    );
-  }
-
-  if (spend.online > 0) {
-    addRecommendation(
-      items,
-      "citi-rewards",
-      "First online retail bucket.",
-      `Allocate up to about S$1,000 per statement month of eligible online retail, food delivery and ride-hailing spend.`,
-      "Avoid flights, hotels, travel agencies and mobile wallet transactions."
-    );
-    if (spend.online > 800 || spend.travel > 0) {
-      addRecommendation(
-        items,
-        "dbs-womans-world",
-        "Second online bucket and useful for online travel-style payments.",
-        "Allocate up to about S$1,000 per calendar month of online spend.",
-        "DBS Points can be short-expiry; verify merchant coding for bonus eligibility."
-      );
+  if (!wantsCashback || wantsBalanced) {
+    if (onlineRetail > 0) {
+      candidates.push(recommendation(
+        "citi-rewards",
+        Math.min(onlineRetail, 1000) * 1.35 + (wantsMiles ? 250 : 0),
+        "First online bucket",
+        "Strong first card for online retail, food delivery, ride-hailing and selected shopping MCCs.",
+        `Put the first ${money(Math.min(onlineRetail, 1000))} of eligible online retail-style spend here each statement month.`,
+        "Avoid flights, hotels, OTAs, mobile-wallet routes and wallet top-ups.",
+        "Core"
+      ));
     }
-  }
 
-  if (spend.contactless > 0 || spend.transport > 0) {
-    addRecommendation(
-      items,
-      "uob-preferred-visa",
-      "Default offline mobile-contactless card.",
-      "Use Apple Pay/Google Pay/Samsung Pay tap for everyday contactless spend and selected online merchants.",
-      "Physical card tap does not count for this card's mobile-contactless bonus."
-    );
-  }
+    if (onlineOverflow > 0 || spend.travel > 0) {
+      const dbsTarget = Math.min(1000, onlineOverflow + spend.travel);
+      candidates.push(recommendation(
+        "dbs-womans-world",
+        dbsTarget * 1.15 + (spend.travel > 0 ? 250 : 0),
+        "Online overflow / online travel",
+        "Useful second online bucket, especially where Citi Rewards is excluded or travel-style online spend is involved.",
+        `Put up to ${money(dbsTarget || 1000)} of online overflow or online travel-style transactions here each calendar month.`,
+        "DBS Points from this card have short expiry; check merchant coding for bonus eligibility.",
+        onlineRetail > 0 ? "Add-on" : "Core"
+      ));
+    }
 
-  const largestCategory = [
-    ["dining", spend.dining],
-    ["travel", spend.travel],
-    ["transport", spend.transport],
-    ["family/groceries", spend.groceries],
-  ].sort((a, b) => b[1] - a[1])[0];
+    if (mobileContactless > 0 || spend.online > 700) {
+      const contactlessTarget = Math.min(mobileContactless, 600);
+      const selectedOnlineTarget = Math.min(Math.max(0, spend.online - Math.min(onlineRetail, 1000)), 600);
+      candidates.push(recommendation(
+        "uob-preferred-visa",
+        (contactlessTarget * 1.45) + (selectedOnlineTarget * 0.7) + 150,
+        "Everyday mobile contactless",
+        "Best default for Apple Pay/Google Pay/Samsung Pay taps, with a separate selected-online bucket.",
+        `Use up to ${money(600)} mobile contactless plus up to ${money(600)} selected online each calendar month.`,
+        "Physical card tap does not count for the mobile-contactless bucket; UOB awards in S$5 blocks.",
+        "Core"
+      ));
+    }
 
-  if (largestCategory && largestCategory[1] >= 350) {
-    addRecommendation(
-      items,
-      "uob-ladys",
-      `Dedicated category card for ${largestCategory[0]}.`,
-      `Set the quarterly category to ${largestCategory[0]} if the MCC fit is clean.`,
-      "Category is MCC-based; the merchant's actual code matters more than the user's intention."
-    );
-  }
+    if (category?.value >= 300) {
+      candidates.push(recommendation(
+        "uob-ladys",
+        Math.min(category.value, 1000) * 1.15 + (category.value >= 600 ? 160 : 0),
+        `${category.label} category card`,
+        `Best dedicated category card because ${category.label.toLowerCase()} is one of the user's larger recurring spend buckets.`,
+        `Set the quarterly category to ${category.category} and route up to ${money(Math.min(category.value, 1000))}/month if MCC fit is clean.`,
+        "Category is MCC-based; actual merchant code matters more than the user's intention.",
+        "Add-on"
+      ));
+    }
 
-  if (spend.overseas >= 700 || spend.contactless >= 1300) {
-    addRecommendation(
-      items,
-      "uob-visa-signature",
-      "Higher-cap card for larger contactless or overseas months.",
-      "Use only when the client can confidently clear the S$1,000 bucket minimum.",
-      "Missing the minimum spend makes this much weaker."
-    );
-  }
+    if (spend.overseas >= 900 || mobileContactless >= 1200) {
+      const bucket = spend.overseas >= mobileContactless ? "overseas" : "local petrol/contactless";
+      candidates.push(recommendation(
+        "uob-visa-signature",
+        Math.max(spend.overseas, mobileContactless) + 150,
+        "High-spend threshold bucket",
+        `Good fit when the user can clear the S$1,000 ${bucket} bucket minimum.`,
+        `Use for ${bucket} months where spend is at least S$1,000 and ideally near the S$1,200 cap.`,
+        "Skip this card when the relevant bucket is below S$1,000; the earn rate becomes much weaker.",
+        "Conditional"
+      ));
+    }
 
-  if (spend.online >= 700 || spend.groceries >= 400) {
-    addRecommendation(
-      items,
-      "ocbc-rewards",
-      "Shopping promo layer for selected platforms.",
-      "Use for Shopee, Lazada, Taobao, TikTok Shop and Watsons while the promo is live.",
-      "Promo is date-sensitive; recheck after 30 June 2026."
-    );
-  }
+    if (shoppingSpend >= 600) {
+      candidates.push(recommendation(
+        "ocbc-rewards",
+        Math.min(shoppingSpend, 1000) * 0.9,
+        "Promo shopping layer",
+        "Useful for listed shopping platforms while the 6 mpd promo remains available.",
+        "Use for Watsons, Shopee, Lazada, Taobao, TikTok Shop and selected retail categories.",
+        "Promo and merchant list are date-sensitive; recheck current OCBC terms before relying on it.",
+        "Optional"
+      ));
+    }
 
-  if (items.length < 3) {
-    addRecommendation(
-      items,
+    if (simpleMode || totalSpend > 4500) {
+      candidates.push(recommendation(
+        "krisflyer-uob",
+        (simpleMode ? 900 : 250) + Math.max(0, totalSpend - 3500) * 0.25,
+        "Simple direct-KrisFlyer fallback",
+        "Good fit when the user wants fewer cards or regularly exceeds specialised 4 mpd caps.",
+        "Use after specialised caps are filled, or as the main card when simplicity matters more than maximum earn rate.",
+        "Requires S$1,000 annual SIA Group spend to unlock accelerated everyday categories.",
+        simpleMode ? "Core" : "Overflow"
+      ));
+    }
+
+    candidates.push(recommendation(
       "hsbc-revolution",
-      "Flexible starter card for eligible online/contactless categories.",
-      "Use as a simple bridge card for dining, shopping, travel and selected everyday categories.",
-      "Check HSBC selected categories and EGA conditions before promising the highest earn rate."
-    );
+      Math.min(spendAmount(spend, ["dining", "travel", "online", "contactless"]), 1000) * 0.65 + 120,
+      "Flexible starter / gap filler",
+      "Good bridge card for eligible everyday categories when the user wants a cleaner starter setup.",
+      "Use for eligible HSBC online/contactless bonus categories after more specialised buckets are assigned.",
+      "Check HSBC selected categories and EGA conditions before assuming the highest earn rate.",
+      "Optional"
+    ));
   }
 
-  return items.slice(0, simpleMode ? 4 : 6);
+  const priorityWeight = { Core: 0, "Add-on": 1, Conditional: 2, Optional: 3, Overflow: 4 };
+  const ranked = candidates
+    .filter(Boolean)
+    .filter((item) => item.score > 0)
+    .sort((a, b) => (priorityWeight[a.priority] ?? 9) - (priorityWeight[b.priority] ?? 9) || b.score - a.score);
+
+  ranked.forEach((item) => addRecommendation(items, item));
+
+  const maxCards = simpleMode ? 3 : wantsCashback ? 4 : 6;
+  return items.slice(0, maxCards).map((item, index) => ({ ...item, rank: index + 1 }));
 }
 
 function portfolioMarkdown(profile, items) {
-  const title = profile.clientName ? `Card portfolio for ${profile.clientName}` : "Tailored card portfolio";
+  const title = profile.userName ? `Card portfolio for ${profile.userName}` : "Tailored card portfolio";
   const spendLines = Object.entries(profile.spend)
     .filter(([, value]) => value > 0)
-    .map(([key, value]) => `- ${key}: S$${value.toLocaleString("en-SG")}`);
+    .map(([key, value]) => `- ${key}: ${money(value)}`);
 
   const cardLines = items.map((item, index) => [
-    `${index + 1}. ${item.card.card_name}`,
+    `${index + 1}. ${item.card.card_name} (${item.priority}: ${item.role})`,
+    `   - Use for: ${item.allocation}`,
     `   - Why: ${item.why}`,
-    `   - Use: ${item.allocation}`,
     `   - Watch-out: ${item.caution}`,
     `   - Official: ${item.card.official_product_url}`,
   ].join("\n"));
@@ -465,7 +537,7 @@ function portfolioMarkdown(profile, items) {
     cardLines.join("\n\n"),
     "",
     "## Important reminder",
-    "Card earn rates, MCC treatment, exclusions and promos change frequently. Recheck official bank terms before client-specific advice.",
+    "Card earn rates, MCC treatment, exclusions and promos change frequently. Recheck official bank terms before user-specific advice.",
   ].join("\n");
 }
 
@@ -476,20 +548,26 @@ function renderPortfolio(event) {
   const items = buildPortfolio(profile);
   appState.lastPortfolio = portfolioMarkdown(profile, items);
 
-  const title = profile.clientName ? `${profile.clientName}'s card portfolio` : "Tailored card portfolio";
+  const title = profile.userName ? `${escapeHtml(profile.userName)}'s card portfolio` : "Tailored card portfolio";
   selectors.portfolioOutput.innerHTML = `
     <div>
       <p class="eyebrow">Tailored recommendation</p>
       <h2>${title}</h2>
-      <p>${items.length} cards selected from S$${profile.totalSpend.toLocaleString("en-SG")} monthly spend.</p>
+      <p>${cardCountLabel(items.length)} selected from ${money(profile.totalSpend)} monthly spend. Preference: ${escapeHtml(preferenceLabel(profile.preference))}${profile.simpleMode ? " · fewer cards" : ""}.</p>
+    </div>
+    <div class="portfolio-summary">
+      <div><strong>${money(profile.totalSpend)}</strong><span>Monthly spend</span></div>
+      <div><strong>${escapeHtml(preferenceLabel(profile.preference))}</strong><span>Reward style</span></div>
+      <div><strong>${cardCountLabel(items.length)}</strong><span>Suggested setup</span></div>
     </div>
     <div class="portfolio-grid">
       ${items.map((item) => `
         <article class="portfolio-item">
-          <h3>${item.card.card_name}</h3>
-          <p><strong>Why:</strong> ${item.why}</p>
-          <p><strong>Use:</strong> ${item.allocation}</p>
-          <p><strong>Watch:</strong> ${item.caution}</p>
+          <p class="portfolio-role">Priority ${item.rank} · ${escapeHtml(item.priority)} · ${escapeHtml(item.role)}</p>
+          <h3>${escapeHtml(item.card.card_name)}</h3>
+          <p><strong>Use for:</strong> ${escapeHtml(item.allocation)}</p>
+          <p><strong>Why:</strong> ${escapeHtml(item.why)}</p>
+          <p><strong>Watch:</strong> ${escapeHtml(item.caution)}</p>
         </article>
       `).join("")}
     </div>

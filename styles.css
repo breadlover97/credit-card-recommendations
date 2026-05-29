@@ -350,6 +350,31 @@ button {
   margin: 8px 0 0;
 }
 
+.portfolio-summary {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.portfolio-summary div {
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px;
+}
+
+.portfolio-summary strong {
+  display: block;
+  font-size: 1rem;
+}
+
+.portfolio-summary span {
+  color: var(--muted);
+  display: block;
+  font-size: 0.78rem;
+  margin-top: 5px;
+}
+
 .portfolio-grid {
   display: grid;
   gap: 10px;
@@ -366,6 +391,15 @@ button {
 .portfolio-item h3 {
   font-size: 0.98rem;
   margin: 0 0 7px;
+}
+
+.portfolio-role {
+  color: var(--accent);
+  font-size: 0.74rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  margin: 0 0 8px;
+  text-transform: uppercase;
 }
 
 .portfolio-item p {
@@ -735,6 +769,7 @@ summary {
   }
 
   .summary-strip,
+  .portfolio-summary,
   .portfolio-grid,
   .card-grid,
   .spend-grid {

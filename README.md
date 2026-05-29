@@ -1,6 +1,6 @@
 # Singapore Credit Card Recommendations
 
-Static single-page site for browsing Singapore credit card recommendations and exporting a tailored client card portfolio.
+Static single-page site for browsing Singapore credit card recommendations and exporting a tailored user card portfolio.
 
 ## Files
 
