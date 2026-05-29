@@ -494,6 +494,7 @@ button {
 }
 
 .portfolio-grid {
+  align-items: start;
   display: grid;
   gap: 16px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -774,6 +775,7 @@ button {
 }
 
 .card-grid {
+  align-items: start;
   display: grid;
   gap: 16px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -966,11 +968,41 @@ details {
 }
 
 summary {
+  align-items: center;
   color: var(--accent);
   cursor: pointer;
+  display: flex;
   font-size: 0.9rem;
   font-weight: 800;
-  list-style-position: outside;
+  gap: 10px;
+  justify-content: space-between;
+  line-height: 1.2;
+  list-style: none;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+summary::after {
+  align-items: center;
+  background: rgba(0, 102, 204, 0.08);
+  border-radius: 999px;
+  content: "+";
+  display: inline-flex;
+  flex: 0 0 22px;
+  font-size: 0.9rem;
+  height: 22px;
+  justify-content: center;
+  line-height: 1;
+  transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+  width: 22px;
+}
+
+details[open] > summary::after {
+  background: var(--accent);
+  color: #fff;
+  content: "-";
 }
 
 .details-grid {
