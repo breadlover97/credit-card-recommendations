@@ -20,6 +20,117 @@ const tagOptions = [
   "cashback",
 ];
 
+const REWARD_PROGRAMS = {
+  "hsbc-revolution": {
+    program: "HSBC Rewards Points",
+    type: "miles",
+    quality: 90,
+    flexibility: 96,
+    simplicity: 76,
+    partnerCount: "20+ airline and hotel partners",
+    expiry: "About 37 months from the month after points are awarded.",
+    pooling: "Kept by card, but pooled for redemption; redeem before cancelling a card.",
+    friction: "Most airline and hotel transfers complete within 1 working day; miles/hotel redemption fee is currently waived.",
+    note: "High-value flexible points because of broad partner coverage, relatively long validity and low current transfer friction.",
+  },
+  "citi-rewards": {
+    program: "Citi ThankYou Points",
+    type: "miles",
+    quality: 88,
+    flexibility: 94,
+    simplicity: 60,
+    partnerCount: "11 listed airline and hotel partners",
+    expiry: "Up to 60 months from card approval cycle.",
+    pooling: "Not pooled across Citi cards, even within the same points currency.",
+    friction: "S$27.25 transfer fee unless an instant transfer waiver applies; each Citi card can create its own redemption block.",
+    note: "Very flexible points with long validity and many partners, but orphan points matter because Citi does not pool cards.",
+  },
+  "dbs-womans-world": {
+    program: "DBS Points",
+    type: "miles",
+    quality: 58,
+    flexibility: 56,
+    simplicity: 54,
+    partnerCount: "KrisFlyer, Asia Miles, Qantas and AirAsia",
+    expiry: "DBS Points with expiry generally expire 1 year from the quarterly period earned.",
+    pooling: "Pooled only at redemption; redeem before cancelling the specific card.",
+    friction: "S$27.25 transfer fee; 5,000 DBS Points transfer block for 10,000 KrisFlyer/Asia Miles/Qantas Points.",
+    note: "Strong earn bucket, but lower point quality because expiry is short and partner breadth is narrower.",
+  },
+  "uob-ladys": {
+    program: "UOB UNI$",
+    type: "miles",
+    quality: 68,
+    flexibility: 58,
+    simplicity: 74,
+    partnerCount: "Primarily KrisFlyer and Asia Miles",
+    expiry: "24 to 27 months, expiring 2 years from the last day of the earning quarter.",
+    pooling: "UNI$ pool across UOB cards held by the same principal cardholder.",
+    friction: "Conversion fee applies, but pooling makes multi-UOB setups cleaner.",
+    note: "Less partner choice than Citi or HSBC, but strong ecosystem value when paired with other UOB UNI$ cards.",
+  },
+  "uob-preferred-visa": {
+    program: "UOB UNI$",
+    type: "miles",
+    quality: 68,
+    flexibility: 58,
+    simplicity: 74,
+    partnerCount: "Primarily KrisFlyer and Asia Miles",
+    expiry: "24 to 27 months, expiring 2 years from the last day of the earning quarter.",
+    pooling: "UNI$ pool across UOB cards held by the same principal cardholder.",
+    friction: "Conversion fee applies, but pooling makes multi-UOB setups cleaner.",
+    note: "Less partner choice than Citi or HSBC, but strong ecosystem value when paired with other UOB UNI$ cards.",
+  },
+  "uob-visa-signature": {
+    program: "UOB UNI$",
+    type: "miles",
+    quality: 68,
+    flexibility: 58,
+    simplicity: 74,
+    partnerCount: "Primarily KrisFlyer and Asia Miles",
+    expiry: "24 to 27 months, expiring 2 years from the last day of the earning quarter.",
+    pooling: "UNI$ pool across UOB cards held by the same principal cardholder.",
+    friction: "Conversion fee applies, but pooling makes multi-UOB setups cleaner.",
+    note: "Less partner choice than Citi or HSBC, but strong ecosystem value when paired with other UOB UNI$ cards.",
+  },
+  "krisflyer-uob": {
+    program: "Direct KrisFlyer miles",
+    type: "miles",
+    quality: 54,
+    flexibility: 36,
+    simplicity: 92,
+    partnerCount: "KrisFlyer only",
+    expiry: "KrisFlyer miles generally expire 3 years after they are earned for basic and elite members.",
+    pooling: "Miles credit straight into KrisFlyer and pool with other KrisFlyer miles.",
+    friction: "No manual conversion or bank transfer fee, but no bank-points holding period.",
+    note: "Best for simplicity and SIA loyalists; lower flexibility because miles are locked into KrisFlyer immediately.",
+  },
+  "ocbc-rewards": {
+    program: "OCBC$",
+    type: "miles",
+    quality: 72,
+    flexibility: 78,
+    simplicity: 68,
+    partnerCount: "Airline and hotel partners including KrisFlyer, Asia Miles, Avios, Flying Blue, United, Etihad, IHG, Accor and Marriott",
+    expiry: "OCBC$ expire 24 months after they are earned.",
+    pooling: "Only same OCBC reward currencies pool; OCBC$ do not pool with 90°N Miles or VOYAGE Miles.",
+    friction: "Admin fee applies for airline and hotel exchanges.",
+    note: "Better partner breadth than older OCBC setups, but OCBC$ expiry and currency silos still need tracking.",
+  },
+  "citi-smrt": {
+    program: "SMRT$ cashback",
+    type: "cashback",
+    quality: 74,
+    flexibility: 72,
+    simplicity: 82,
+    partnerCount: "Cashback, not miles partners",
+    expiry: "Cashback rules apply instead of airline-mile expiry.",
+    pooling: "Not relevant for miles pooling.",
+    friction: "Simpler value than miles, but subject to minimum spend and category rules.",
+    note: "Good for users who value cash value certainty over airline partner flexibility.",
+  },
+};
+
 const selectors = {
   segments: document.querySelectorAll(".segment"),
   search: document.querySelector("#search-input"),
@@ -356,6 +467,74 @@ function preferenceLabel(value) {
   return "Miles first";
 }
 
+function rewardProgram(cardId) {
+  return REWARD_PROGRAMS[cardId] || {
+    program: "Rewards programme",
+    type: "miles",
+    quality: 60,
+    flexibility: 60,
+    simplicity: 60,
+    partnerCount: "Check official terms",
+    expiry: "Check official terms.",
+    pooling: "Check official terms.",
+    friction: "Check official terms.",
+    note: "Reward quality should be checked before final advice.",
+  };
+}
+
+function likelyUobEcosystem(profile) {
+  const category = largestCategory(profile.spend);
+  let uobFitCount = 0;
+  if (spendAmount(profile.spend, ["contactless", "transport"]) > 0 || profile.spend.online > 700) uobFitCount += 1;
+  if (category?.value >= 300) uobFitCount += 1;
+  if (profile.spend.overseas >= 900 || spendAmount(profile.spend, ["contactless", "transport"]) >= 1200) uobFitCount += 1;
+  return uobFitCount >= 2;
+}
+
+function rewardQualityAdjustment(item, profile) {
+  const reward = rewardProgram(item.card.card_id);
+  const wantsCashback = profile.preference === "cashback";
+  const wantsMiles = profile.preference === "miles";
+  const lowMilesVolume = profile.totalSpend < 1600;
+  let adjustment = 0;
+
+  if (reward.type === "cashback") {
+    adjustment += wantsCashback ? 210 : profile.preference === "balanced" ? 60 : -180;
+    adjustment += profile.simpleMode ? 70 : 0;
+  } else {
+    adjustment += wantsCashback ? -140 : 0;
+    adjustment += wantsMiles ? (reward.flexibility - 60) * 4 : (reward.quality - 60) * 2.2;
+    adjustment += profile.simpleMode ? (reward.simplicity - 60) * 3 : 0;
+  }
+
+  if (/1 year|short/i.test(`${reward.expiry} ${reward.note}`) && lowMilesVolume) adjustment -= 130;
+  if (/60 months|37 months|24 to 27 months/i.test(reward.expiry) && wantsMiles) adjustment += 35;
+  if (/not pooled/i.test(reward.pooling) && lowMilesVolume) adjustment -= 80;
+  if (/UOB UNI/i.test(reward.program) && likelyUobEcosystem(profile)) adjustment += 80;
+  if (item.card.card_id === "krisflyer-uob" && !profile.simpleMode && wantsMiles) adjustment -= 65;
+  if (item.card.card_id === "hsbc-revolution" && wantsMiles) adjustment += 70;
+
+  return Math.round(adjustment);
+}
+
+function applyRewardQuality(candidates, profile) {
+  return candidates.filter(Boolean).map((item) => {
+    const reward = rewardProgram(item.card.card_id);
+    const rewardScore = rewardQualityAdjustment(item, profile);
+    return {
+      ...item,
+      reward,
+      rewardScore,
+      score: item.score + rewardScore,
+    };
+  });
+}
+
+function rewardQualitySummary(item) {
+  const reward = item.reward || rewardProgram(item.card.card_id);
+  return `${reward.program}: ${reward.note} ${reward.expiry}`;
+}
+
 function addRecommendation(items, recommendation) {
   if (!recommendation?.card || items.some((item) => item.card.card_id === recommendation.card.card_id)) return;
   items.push(recommendation);
@@ -500,8 +679,7 @@ function buildPortfolio(profile) {
   }
 
   const priorityWeight = { Core: 0, "Add-on": 1, Conditional: 2, Optional: 3, Overflow: 4 };
-  const ranked = candidates
-    .filter(Boolean)
+  const ranked = applyRewardQuality(candidates, profile)
     .filter((item) => item.score > 0)
     .sort((a, b) => (priorityWeight[a.priority] ?? 9) - (priorityWeight[b.priority] ?? 9) || b.score - a.score);
 
@@ -521,6 +699,8 @@ function portfolioMarkdown(profile, items) {
     `${index + 1}. ${item.card.card_name} (${item.priority}: ${item.role})`,
     `   - Use for: ${item.allocation}`,
     `   - Why: ${item.why}`,
+    `   - Reward quality: ${rewardQualitySummary(item)}`,
+    `   - Transfer/expiry notes: ${item.reward.partnerCount}; ${item.reward.pooling}; ${item.reward.friction}`,
     `   - Watch-out: ${item.caution}`,
     `   - Official: ${item.card.official_product_url}`,
   ].join("\n"));
@@ -553,12 +733,13 @@ function renderPortfolio(event) {
     <div>
       <p class="eyebrow">Tailored recommendation</p>
       <h2>${title}</h2>
-      <p>${cardCountLabel(items.length)} selected from ${money(profile.totalSpend)} monthly spend. Preference: ${escapeHtml(preferenceLabel(profile.preference))}${profile.simpleMode ? " · fewer cards" : ""}.</p>
+      <p>${cardCountLabel(items.length)} selected from ${money(profile.totalSpend)} monthly spend. Preference: ${escapeHtml(preferenceLabel(profile.preference))}${profile.simpleMode ? " · fewer cards" : ""}. Rankings also factor point expiry, transfer partners, pooling and transfer friction.</p>
     </div>
     <div class="portfolio-summary">
       <div><strong>${money(profile.totalSpend)}</strong><span>Monthly spend</span></div>
       <div><strong>${escapeHtml(preferenceLabel(profile.preference))}</strong><span>Reward style</span></div>
       <div><strong>${cardCountLabel(items.length)}</strong><span>Suggested setup</span></div>
+      <div><strong>Point quality</strong><span>Expiry, partners, pooling</span></div>
     </div>
     <div class="portfolio-grid">
       ${items.map((item) => `
@@ -567,6 +748,8 @@ function renderPortfolio(event) {
           <h3>${escapeHtml(item.card.card_name)}</h3>
           <p><strong>Use for:</strong> ${escapeHtml(item.allocation)}</p>
           <p><strong>Why:</strong> ${escapeHtml(item.why)}</p>
+          <p><strong>Reward quality:</strong> ${escapeHtml(rewardQualitySummary(item))}</p>
+          <p><strong>Transfer/expiry:</strong> ${escapeHtml(`${item.reward.partnerCount}; ${item.reward.pooling}; ${item.reward.friction}`)}</p>
           <p><strong>Watch:</strong> ${escapeHtml(item.caution)}</p>
         </article>
       `).join("")}
