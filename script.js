@@ -6,6 +6,8 @@ const appState = {
   definitionsOpen: false,
   portfolioContextOpen: false,
   lastPortfolio: "",
+  lastPortfolioProfile: null,
+  lastPortfolioItems: [],
 };
 
 const tagOptions = [
@@ -144,6 +146,7 @@ const selectors = {
   template: document.querySelector("#card-template"),
   cardsTitle: document.querySelector("#cards-title"),
   definitionsToggle: document.querySelector("#definitions-toggle"),
+  printReport: document.querySelector("#print-report"),
   portfolioForm: document.querySelector("#portfolio-form"),
   portfolioOutput: document.querySelector("#portfolio-output"),
   downloadPortfolio: document.querySelector("#download-portfolio"),
@@ -755,12 +758,102 @@ function portfolioMarkdown(profile, items) {
   ].join("\n");
 }
 
+function spendLabel(key) {
+  const labels = {
+    online: "Online",
+    contactless: "Mobile contactless",
+    dining: "Dining",
+    travel: "Travel",
+    groceries: "Groceries",
+    transport: "Transport",
+    overseas: "Overseas / big ticket",
+  };
+  return labels[key] || key;
+}
+
+function printReportHtml(profile, items) {
+  const title = profile.userName ? `${escapeHtml(profile.userName)}'s card portfolio` : "Tailored card portfolio";
+  const spendRows = Object.entries(profile.spend)
+    .filter(([, value]) => value > 0)
+    .map(([key, value]) => `
+      <div>
+        <span>${escapeHtml(spendLabel(key))}</span>
+        <strong>${money(value)}</strong>
+      </div>
+    `).join("");
+
+  return `
+    <div class="print-cover">
+      <p class="eyebrow">Singapore credit cards</p>
+      <h1>${title}</h1>
+      <p>${cardCountLabel(items.length)} selected for ${money(profile.totalSpend)} monthly spend. ${escapeHtml(preferenceLabel(profile.preference))}${profile.simpleMode ? " with fewer cards preferred" : ""}.</p>
+      <div class="print-summary">
+        <div><span>Total spend</span><strong>${money(profile.totalSpend)}</strong></div>
+        <div><span>Reward style</span><strong>${escapeHtml(preferenceLabel(profile.preference))}</strong></div>
+        <div><span>Suggested setup</span><strong>${cardCountLabel(items.length)}</strong></div>
+      </div>
+    </div>
+
+    <section class="print-section">
+      <h2>Spend profile</h2>
+      <div class="print-spend-grid">
+        ${spendRows || "<div><span>No spend entered</span><strong>S$0</strong></div>"}
+      </div>
+    </section>
+
+    <section class="print-section">
+      <h2>Recommended setup</h2>
+      <div class="print-card-grid">
+        ${items.map((item) => `
+          <article class="print-card">
+            <div class="print-card-head">
+              <span>${String(item.rank).padStart(2, "0")}</span>
+              <b>${escapeHtml(item.priority)}</b>
+            </div>
+            <h3>${escapeHtml(item.card.card_name)}</h3>
+            <p class="print-role">${escapeHtml(item.role)}</p>
+            <dl>
+              <div>
+                <dt>Use for</dt>
+                <dd>${escapeHtml(item.allocation)}</dd>
+              </div>
+              <div>
+                <dt>Why</dt>
+                <dd>${escapeHtml(item.why)}</dd>
+              </div>
+              <div>
+                <dt>Reward quality</dt>
+                <dd>${escapeHtml(`${rewardQualityLabel(item)}. ${item.reward.program}. ${item.reward.expiry}`)}</dd>
+              </div>
+              <div>
+                <dt>Transfer / expiry</dt>
+                <dd>${escapeHtml(`${item.reward.partnerCount}; ${item.reward.pooling}; ${item.reward.friction}`)}</dd>
+              </div>
+              <div>
+                <dt>Watch</dt>
+                <dd>${escapeHtml(item.caution)}</dd>
+              </div>
+            </dl>
+          </article>
+        `).join("")}
+      </div>
+    </section>
+
+    <section class="print-footer-note">
+      <strong>Reminder</strong>
+      <span>Card earn rates, MCC treatment, exclusions and promotions change frequently. Recheck official bank terms before user-specific advice.</span>
+    </section>
+  `;
+}
+
 function renderPortfolio(event) {
   if (event) event.preventDefault();
   const profile = profileValues();
   if (!profile || !selectors.portfolioOutput) return;
   const items = buildPortfolio(profile);
   appState.lastPortfolio = portfolioMarkdown(profile, items);
+  appState.lastPortfolioProfile = profile;
+  appState.lastPortfolioItems = items;
 
   const title = profile.userName ? `${escapeHtml(profile.userName)}'s card portfolio` : "Tailored card portfolio";
   if (profile.totalSpend <= 0) {
@@ -836,17 +929,37 @@ function renderPortfolio(event) {
 }
 
 function downloadPortfolio() {
-  if (!selectors.downloadPortfolio) return;
-  if (!appState.lastPortfolio) renderPortfolio();
-  const blob = new Blob([appState.lastPortfolio], { type: "text/markdown" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "card-portfolio-recommendation.md";
-  document.body.append(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
+  if (!selectors.downloadPortfolio || !selectors.printReport) return;
+  const profile = profileValues();
+  if (!profile || profile.totalSpend <= 0) {
+    renderPortfolio();
+    return;
+  }
+
+  const items = buildPortfolio(profile);
+  if (!items.length) {
+    renderPortfolio();
+    return;
+  }
+
+  const originalTitle = document.title;
+  selectors.printReport.innerHTML = printReportHtml(profile, items);
+  document.title = profile.userName
+    ? `${profile.userName} card portfolio`
+    : "card portfolio recommendation";
+  document.body.classList.add("print-mode");
+
+  const cleanup = () => {
+    document.body.classList.remove("print-mode");
+    document.title = originalTitle;
+    window.removeEventListener("afterprint", cleanup);
+  };
+
+  window.addEventListener("afterprint", cleanup);
+  window.setTimeout(() => {
+    window.print();
+    window.setTimeout(cleanup, 1000);
+  }, 50);
 }
 
 function resetProfile() {
