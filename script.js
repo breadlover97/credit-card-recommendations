@@ -446,17 +446,51 @@ function renderTable() {
 
 function profileValues() {
   if (!selectors.portfolioForm) return null;
-  const spend = {};
+  const rawSpend = {};
   document.querySelectorAll("[data-spend]").forEach((input) => {
-    spend[input.dataset.spend] = Number(input.value || 0);
+    rawSpend[input.dataset.spend] = Number(input.value || 0);
   });
+  const spend = normalizeSpend(rawSpend);
 
   return {
     userName: document.querySelector("#user-name").value.trim(),
     preference: document.querySelector("#reward-preference").value,
     simpleMode: document.querySelector("#simple-mode").checked,
+    rawSpend,
     spend,
-    totalSpend: Object.values(spend).reduce((sum, value) => sum + value, 0),
+    totalSpend: Object.values(rawSpend).reduce((sum, value) => sum + value, 0),
+  };
+}
+
+function normalizeSpend(rawSpend) {
+  const onlineShopping = Number(rawSpend.onlineShopping || 0);
+  const foodDeliveryRideHailing = Number(rawSpend.foodDeliveryRideHailing || 0);
+  const onlineTravel = Number(rawSpend.onlineTravel || 0);
+  const mobileContactlessDining = Number(rawSpend.mobileContactlessDining || 0);
+  const mobileContactlessGroceries = Number(rawSpend.mobileContactlessGroceries || 0);
+  const mobileContactlessTransport = Number(rawSpend.mobileContactlessTransport || 0);
+  const mobileContactlessOther = Number(rawSpend.mobileContactlessOther || 0);
+  const overseasOnline = Number(rawSpend.overseasOnline || 0);
+  const overseasInPerson = Number(rawSpend.overseasInPerson || 0);
+  const largeBills = Number(rawSpend.largeBills || 0);
+  const contactless = mobileContactlessDining + mobileContactlessGroceries + mobileContactlessTransport + mobileContactlessOther;
+
+  return {
+    online: onlineShopping + foodDeliveryRideHailing,
+    onlineShopping,
+    foodDeliveryRideHailing,
+    onlineTravel,
+    overseasOnline,
+    contactless,
+    dining: mobileContactlessDining,
+    groceries: mobileContactlessGroceries,
+    transport: mobileContactlessTransport + foodDeliveryRideHailing,
+    travel: onlineTravel,
+    overseas: overseasOnline + overseasInPerson,
+    largeBills,
+    shoppingRetail: onlineShopping + overseasOnline + mobileContactlessGroceries,
+    cashbackEligible: onlineShopping + mobileContactlessGroceries + mobileContactlessTransport + overseasInPerson,
+    hsbcGap: onlineShopping + foodDeliveryRideHailing + onlineTravel + overseasOnline + contactless,
   };
 }
 
@@ -509,9 +543,9 @@ function rewardProgram(cardId) {
 function likelyUobEcosystem(profile) {
   const category = largestCategory(profile.spend);
   let uobFitCount = 0;
-  if (spendAmount(profile.spend, ["contactless", "transport"]) > 0 || profile.spend.online > 700) uobFitCount += 1;
+  if (profile.spend.contactless > 0 || profile.spend.online > 700) uobFitCount += 1;
   if (category?.value >= 300) uobFitCount += 1;
-  if (profile.spend.overseas >= 900 || spendAmount(profile.spend, ["contactless", "transport"]) >= 1200) uobFitCount += 1;
+  if (profile.spend.overseas >= 900 || profile.spend.contactless >= 1200) uobFitCount += 1;
   return uobFitCount >= 2;
 }
 
@@ -589,9 +623,9 @@ function buildPortfolio(profile) {
   const category = largestCategory(spend);
   const onlineRetail = Math.max(0, spend.online);
   const onlineOverflow = Math.max(0, spend.online - 1000);
-  const mobileContactless = spendAmount(spend, ["contactless", "transport"]);
-  const shoppingSpend = Math.max(spend.online, 0) + Math.max(spend.groceries, 0);
-  const cashbackSpend = spendAmount(spend, ["groceries", "transport", "online", "overseas"]);
+  const mobileContactless = Math.max(0, spend.contactless);
+  const shoppingSpend = Math.max(spend.shoppingRetail, 0);
+  const cashbackSpend = Math.max(spend.cashbackEligible, 0);
   const wantsCashback = preference === "cashback";
   const wantsMiles = preference === "miles";
   const wantsBalanced = preference === "balanced";
@@ -605,10 +639,10 @@ function buildPortfolio(profile) {
       Math.min(cashbackSpend, 1200) + (wantsCashback ? 900 : 150) + (clearsMinimum ? 250 : -350),
       "Cashback essentials",
       clearsMinimum
-        ? "Best fit for a cashback-first user with enough groceries, online, MYR or commute spend to clear the S$500 minimum."
+        ? "Best fit for a cashback-first user with enough groceries, online shopping, overseas in-person or commute spend to clear the S$500 minimum."
         : "Only a partial fit because the user may not clear the S$500 statement-month minimum reliably.",
       clearsMinimum
-        ? `Put about ${money(Math.min(cashbackSpend, 1200))} of groceries, online shopping, MYR or commute spend here.`
+        ? `Put about ${money(Math.min(cashbackSpend, 1200))} of groceries, online shopping, overseas in-person or commute spend here.`
         : "Use only if the user can reliably reach S$500 statement-month spend; otherwise keep this as optional.",
       "Do not count wallet top-ups or travel-related online transactions towards bonus cashback.",
       wantsCashback ? "Core" : "Optional"
@@ -621,21 +655,21 @@ function buildPortfolio(profile) {
         "citi-rewards",
         Math.min(onlineRetail, 1000) * 1.35 + (wantsMiles ? 250 : 0),
         "First online bucket",
-        "Strong first card for online retail, food delivery, ride-hailing and selected shopping MCCs.",
+        "Strong first card for online shopping, food delivery and ride-hailing-style spend. Travel bookings are kept out of this bucket.",
         `Put the first ${money(Math.min(onlineRetail, 1000))} of eligible online retail-style spend here each statement month.`,
         "Avoid flights, hotels, OTAs, mobile-wallet routes and wallet top-ups.",
         "Core"
       ));
     }
 
-    if (onlineOverflow > 0 || spend.travel > 0) {
-      const dbsTarget = Math.min(1000, onlineOverflow + spend.travel);
+    if (onlineOverflow > 0 || spend.onlineTravel > 0 || spend.overseasOnline > 0) {
+      const dbsTarget = Math.min(1000, onlineOverflow + spend.onlineTravel + spend.overseasOnline);
       candidates.push(recommendation(
         "dbs-womans-world",
-        dbsTarget * 1.15 + (spend.travel > 0 ? 250 : 0),
-        "Online overflow / online travel",
-        "Useful second online bucket, especially where Citi Rewards is excluded or travel-style online spend is involved.",
-        `Put up to ${money(dbsTarget || 1000)} of online overflow or online travel-style transactions here each calendar month.`,
+        dbsTarget * 1.15 + (spend.onlineTravel > 0 ? 280 : 0) + (spend.overseasOnline > 0 ? 120 : 0),
+        "Online travel / overflow",
+        "Useful for hotel, OTA and other online travel-style spend that should not be treated as generic online shopping.",
+        `Put up to ${money(dbsTarget || 1000)} of online travel, hotels, OTAs, overseas online or online overflow here each calendar month.`,
         "DBS Points from this card have short expiry; check merchant coding for bonus eligibility.",
         onlineRetail > 0 ? "Add-on" : "Core"
       ));
@@ -650,7 +684,7 @@ function buildPortfolio(profile) {
         "Everyday mobile contactless",
         "Best default for Apple Pay/Google Pay/Samsung Pay taps, with a separate selected-online bucket.",
         `Use up to ${money(600)} mobile contactless plus up to ${money(600)} selected online each calendar month.`,
-        "Physical card tap does not count for the mobile-contactless bucket; UOB awards in S$5 blocks.",
+        "Physical card tap does not count for the mobile-contactless bucket; hotel/OTA online spend may be better treated separately.",
         "Core"
       ));
     }
@@ -706,9 +740,9 @@ function buildPortfolio(profile) {
 
     candidates.push(recommendation(
       "hsbc-revolution",
-      Math.min(spendAmount(spend, ["dining", "travel", "online", "contactless"]), 1000) * 0.65 + 120,
+      Math.min(spend.hsbcGap, 1000) * 0.65 + (spend.onlineTravel > 0 ? 160 : 120),
       "Flexible starter / gap filler",
-      "Good bridge card for eligible everyday categories when the user wants a cleaner starter setup.",
+      "Good bridge card for eligible everyday online/contactless categories, including travel gaps when HSBC recognises the category.",
       "Use for eligible HSBC online/contactless bonus categories after more specialised buckets are assigned.",
       "Check HSBC selected categories and EGA conditions before assuming the highest earn rate.",
       "Optional"
@@ -728,9 +762,9 @@ function buildPortfolio(profile) {
 
 function portfolioMarkdown(profile, items) {
   const title = profile.userName ? `Card portfolio for ${profile.userName}` : "Tailored card portfolio";
-  const spendLines = Object.entries(profile.spend)
+  const spendLines = Object.entries(profile.rawSpend || profile.spend)
     .filter(([, value]) => value > 0)
-    .map(([key, value]) => `- ${key}: ${money(value)}`);
+    .map(([key, value]) => `- ${spendLabel(key)}: ${money(value)}`);
 
   const cardLines = items.map((item, index) => [
     `${index + 1}. ${item.card.card_name} (${item.priority}: ${item.role})`,
@@ -760,20 +794,23 @@ function portfolioMarkdown(profile, items) {
 
 function spendLabel(key) {
   const labels = {
-    online: "Online",
-    contactless: "Mobile contactless",
-    dining: "Dining",
-    travel: "Travel",
-    groceries: "Groceries",
-    transport: "Transport",
-    overseas: "Overseas / big ticket",
+    onlineShopping: "Online shopping",
+    foodDeliveryRideHailing: "Food delivery / ride-hailing",
+    onlineTravel: "Online travel / hotels / OTA",
+    mobileContactlessDining: "Mobile contactless dining",
+    mobileContactlessGroceries: "Mobile contactless groceries",
+    mobileContactlessTransport: "Mobile contactless transport",
+    mobileContactlessOther: "Other mobile contactless",
+    overseasOnline: "Overseas online",
+    overseasInPerson: "Overseas in-person",
+    largeBills: "Big ticket / bills",
   };
   return labels[key] || key;
 }
 
 function printReportHtml(profile, items) {
   const title = profile.userName ? `${escapeHtml(profile.userName)}'s card portfolio` : "Tailored card portfolio";
-  const spendRows = Object.entries(profile.spend)
+  const spendRows = Object.entries(profile.rawSpend || profile.spend)
     .filter(([, value]) => value > 0)
     .map(([key, value]) => `
       <div>
