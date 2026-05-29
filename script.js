@@ -190,7 +190,7 @@ function escapeHtml(text) {
 
 function emphasize(text) {
   const escaped = escapeHtml(text);
-  const pattern = /(4\s?mpd|6\s?mpd|8\s?mpd|mobile contactless|contactless|online|dining|travel|transport|groceries|overseas|S\$1,000|S\$1,100|S\$1,110|S\$1,200|S\$500|minimum spend|no minimum)/gi;
+  const pattern = /(1\.2\s?mpd|2\.4\s?mpd|3\s?mpd|4\s?mpd|5%|6\s?mpd|8\s?mpd|10X|S\$5 blocks|S\$500|S\$600|S\$1,000|S\$1,200|mobile contactless|mobile wallet|e-wallet top-ups|physical card tap|selected online|contactless|online|dining|travel|transport|groceries|overseas|statement month|calendar month|minimum spend|no minimum)/gi;
   return escaped.replace(pattern, "<strong>$1</strong>");
 }
 
@@ -220,7 +220,7 @@ function renderCards(cards) {
     node.querySelector(".tier").textContent = card.recommendation_tier;
 
     node.querySelectorAll("[data-field]").forEach((element) => {
-      element.textContent = card[element.dataset.field] || "Check official terms.";
+      element.innerHTML = emphasize(card[element.dataset.field] || "Check official terms.");
     });
 
     const links = node.querySelector(".links");
