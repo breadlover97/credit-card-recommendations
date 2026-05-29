@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Singapore Credit Card Recommendations</title>
+    <meta name="description" content="A practical Singapore credit card recommendation reference for miles and cashback cards.">
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Singapore credit cards</p>
+        <h1>Credit card recommendations</h1>
+      </div>
+      <div class="top-actions">
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a class="active" href="index.html">Cards</a>
+          <a href="portfolio.html">Tailor portfolio</a>
+        </nav>
+        <div class="source-pill" id="source-status">Loading card data</div>
+      </div>
+    </header>
+
+    <main>
+      <section class="workspace" aria-label="Card recommendation workspace">
+        <aside class="sidebar" aria-label="Controls">
+          <div class="panel">
+            <h2>Browse cards</h2>
+            <div class="segmented" role="tablist" aria-label="Card category">
+              <button class="segment active" type="button" data-category="miles" role="tab" aria-selected="true">Miles</button>
+              <button class="segment" type="button" data-category="cashback" role="tab" aria-selected="false">Cashback</button>
+              <button class="segment" type="button" data-category="all" role="tab" aria-selected="false">All</button>
+            </div>
+            <label class="field">
+              <span>Search</span>
+              <input id="search-input" type="search" autocomplete="off" placeholder="online, dining, UOB, exclusions">
+            </label>
+            <div class="filter-block">
+              <span>Quick filters</span>
+              <div class="chips" id="tag-filters"></div>
+            </div>
+          </div>
+
+          <div class="panel cta-panel">
+            <p class="eyebrow">Client workflow</p>
+            <h2>Need a tailored recommendation?</h2>
+            <p>Use the portfolio page when you want to enter a client spend profile and export a short recommendation note.</p>
+            <a class="primary-link" href="portfolio.html">Tailor a portfolio</a>
+          </div>
+        </aside>
+
+        <section class="content">
+          <section class="table-section" aria-label="All cards summary table">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">At a glance</p>
+                <h2>All cards, concise view</h2>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="card-table">
+                <thead>
+                  <tr>
+                    <th>Card</th>
+                    <th>Earn rate</th>
+                    <th>Best use</th>
+                    <th>Limit</th>
+                    <th>Watch-out</th>
+                  </tr>
+                </thead>
+                <tbody id="card-table-body"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="cards-section" aria-label="Recommended card list">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Reference library</p>
+                <h2 id="cards-title">Recommended miles cards</h2>
+              </div>
+              <button class="ghost-button" type="button" id="advanced-toggle">Show advanced</button>
+            </div>
+            <div class="card-grid" id="card-grid"></div>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <template id="card-template">
+      <article class="card">
+        <div class="card-head">
+          <div>
+            <p class="bank"></p>
+            <h3></h3>
+          </div>
+          <span class="tier"></span>
+        </div>
+        <dl class="facts">
+          <div>
+            <dt>Earn rate</dt>
+            <dd data-field="earn_rate"></dd>
+          </div>
+          <div>
+            <dt>Use for</dt>
+            <dd data-field="use_card_for"></dd>
+          </div>
+          <div>
+            <dt>Bonus limit</dt>
+            <dd data-field="monthly_bonus_limit"></dd>
+          </div>
+          <div>
+            <dt>Nuances</dt>
+            <dd data-field="nuances"></dd>
+          </div>
+        </dl>
+        <details>
+          <summary>Exclusions and definitions</summary>
+          <div class="details-grid">
+            <div>
+              <h4>Important exclusions</h4>
+              <p data-field="important_exclusions"></p>
+            </div>
+            <div>
+              <h4>Definitions / examples</h4>
+              <p data-field="definitions_examples"></p>
+            </div>
+            <div>
+              <h4>Simple note</h4>
+              <p data-field="simple_notes"></p>
+            </div>
+          </div>
+        </details>
+        <div class="advanced">
+          <h4>Advanced references</h4>
+          <p data-field="base_earn_rate"></p>
+          <p data-field="expiry_or_crediting"></p>
+          <div class="links"></div>
+        </div>
+      </article>
+    </template>
+
+    <button class="top-button" type="button" id="return-top" aria-label="Return to top">↑</button>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

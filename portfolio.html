@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tailored Card Portfolio | Singapore Credit Card Recommendations</title>
+    <meta name="description" content="Generate a tailored Singapore credit card portfolio recommendation from a client spend profile.">
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Client portfolio builder</p>
+        <h1>Tailor a card portfolio from a client spend profile.</h1>
+      </div>
+      <div class="top-actions">
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a href="index.html">Cards</a>
+          <a class="active" href="portfolio.html">Tailor portfolio</a>
+        </nav>
+        <div class="source-pill" id="source-status">Loading card data</div>
+      </div>
+    </header>
+
+    <main>
+      <section class="workspace portfolio-workspace" aria-label="Tailored card portfolio workspace">
+        <aside class="sidebar" aria-label="Portfolio inputs">
+          <form class="panel profile-panel" id="portfolio-form">
+            <div class="panel-heading">
+              <h2>Spend profile</h2>
+              <button class="ghost-button" type="button" id="reset-profile">Reset</button>
+            </div>
+
+            <label class="field">
+              <span>Client name</span>
+              <input id="client-name" type="text" placeholder="Optional">
+            </label>
+
+            <label class="field">
+              <span>Reward preference</span>
+              <select id="reward-preference">
+                <option value="miles">Miles first</option>
+                <option value="cashback">Cashback first</option>
+                <option value="balanced">Balanced</option>
+              </select>
+            </label>
+
+            <div class="spend-grid">
+              <label class="field">
+                <span>Online spend</span>
+                <input data-spend="online" type="number" min="0" step="50" value="1000">
+              </label>
+              <label class="field">
+                <span>Mobile contactless</span>
+                <input data-spend="contactless" type="number" min="0" step="50" value="800">
+              </label>
+              <label class="field">
+                <span>Dining</span>
+                <input data-spend="dining" type="number" min="0" step="50" value="500">
+              </label>
+              <label class="field">
+                <span>Travel</span>
+                <input data-spend="travel" type="number" min="0" step="50" value="300">
+              </label>
+              <label class="field">
+                <span>Groceries</span>
+                <input data-spend="groceries" type="number" min="0" step="50" value="400">
+              </label>
+              <label class="field">
+                <span>Transport</span>
+                <input data-spend="transport" type="number" min="0" step="50" value="200">
+              </label>
+              <label class="field">
+                <span>Overseas / big ticket</span>
+                <input data-spend="overseas" type="number" min="0" step="50" value="0">
+              </label>
+            </div>
+
+            <label class="checkbox-field">
+              <input id="simple-mode" type="checkbox">
+              <span>Prefer fewer cards even if earn rate is lower</span>
+            </label>
+
+            <div class="actions">
+              <button class="primary-button" type="submit">Generate portfolio</button>
+              <button class="secondary-button" type="button" id="download-portfolio">Export note</button>
+            </div>
+          </form>
+        </aside>
+
+        <section class="content">
+          <section class="portfolio-output" id="portfolio-output" aria-live="polite">
+            <div>
+              <p class="eyebrow">Tailored recommendation</p>
+              <h2>Start with the spend profile on the left.</h2>
+              <p>Generate a client-ready card portfolio with usage notes, caps and caveats.</p>
+            </div>
+          </section>
+
+          <section class="table-section" aria-label="Portfolio card reference">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Reference</p>
+                <h2>Card shortlist reference</h2>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="card-table compact-table">
+                <thead>
+                  <tr>
+                    <th>Card</th>
+                    <th>Earn rate</th>
+                    <th>Best use</th>
+                    <th>Limit</th>
+                    <th>Watch-out</th>
+                  </tr>
+                </thead>
+                <tbody id="card-table-body"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <button class="top-button" type="button" id="return-top" aria-label="Return to top">↑</button>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
