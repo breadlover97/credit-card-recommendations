@@ -304,6 +304,22 @@ function cardReferenceHref(card) {
   return selectors.grid ? `#${anchor}` : `index.html#${anchor}`;
 }
 
+function cardBankKey(card) {
+  return (card.bank || "").toLowerCase().replace(/[^a-z0-9]+/g, "-");
+}
+
+function cardBankCode(card) {
+  return (card.bank || card.card_name).slice(0, 4).toUpperCase();
+}
+
+function cardVisualHtml(card, className = "") {
+  return `
+    <div class="card-visual ${className}" data-bank="${cardBankKey(card)}" aria-hidden="true">
+      <span class="card-bank-code">${escapeHtml(cardBankCode(card))}</span>
+    </div>
+  `;
+}
+
 function escapeHtml(text) {
   return String(text || "")
     .replaceAll("&", "&amp;")
@@ -328,8 +344,8 @@ function syncDefinitionPanels() {
 
   if (selectors.definitionsToggle) {
     selectors.definitionsToggle.textContent = appState.definitionsOpen
-      ? "Hide all exclusions/definitions"
-      : "Show all exclusions/definitions";
+      ? "Hide all details"
+      : "Show all details";
     selectors.definitionsToggle.setAttribute("aria-expanded", String(appState.definitionsOpen));
   }
 }
@@ -395,11 +411,15 @@ function renderCards(cards) {
     const node = selectors.template.content.firstElementChild.cloneNode(true);
     node.id = cardAnchor(card);
     node.setAttribute("tabindex", "-1");
+    node.dataset.bank = cardBankKey(card);
     node.querySelector("h3").textContent = card.card_name;
-    node.querySelector(".bank").textContent = `${card.bank} · ${card.category}`;
+    node.querySelector(".bank").textContent = card.category;
+    node.querySelector(".card-bank-code").textContent = cardBankCode(card);
 
     node.querySelectorAll("[data-field]").forEach((element) => {
-      element.innerHTML = emphasize(card[element.dataset.field] || "Check official terms.");
+      const value = card[element.dataset.field] || "Check official terms.";
+      const previewOnly = element.closest(".facts") || element.classList.contains("card-note");
+      element.innerHTML = emphasize(previewOnly ? concise(value) : value);
     });
 
     const links = node.querySelector(".links");
@@ -890,9 +910,9 @@ function renderPortfolio(event) {
       <div class="portfolio-hero">
         <div>
           <p class="eyebrow">Tailored recommendation</p>
-          <h2>${title}</h2>
+          <h2>Build a cleaner card setup.</h2>
         </div>
-        <p>Enter spend values to generate a recommended setup.</p>
+        <p>Enter the user's monthly spend and the best-fit cards will appear here.</p>
       </div>
       <div class="portfolio-overview" aria-label="Portfolio summary">
         <span><strong>No spend entered</strong></span>
@@ -908,7 +928,7 @@ function renderPortfolio(event) {
         <p class="eyebrow">Tailored recommendation</p>
         <h2>${title}</h2>
       </div>
-      <p>${cardCountLabel(items.length)} selected for ${money(profile.totalSpend)} monthly spend.</p>
+      <p>${cardCountLabel(items.length)} selected from ${money(profile.totalSpend)} monthly spend.</p>
     </div>
     <div class="portfolio-overview-row">
       <div class="portfolio-overview" aria-label="Portfolio summary">
@@ -926,11 +946,11 @@ function renderPortfolio(event) {
         <article class="portfolio-item ${item.rank <= 2 ? "featured" : ""}">
           <div class="portfolio-item-top">
             <span class="rank-badge">${String(item.rank).padStart(2, "0")}</span>
+            ${cardVisualHtml(item.card, "mini-card-visual")}
           </div>
           <h3>${escapeHtml(item.card.card_name)}</h3>
-          <p class="portfolio-role">${escapeHtml(item.role)}</p>
           <div class="portfolio-use">
-            <span>Use this for</span>
+            <span>${escapeHtml(item.role)}</span>
             <strong>${escapeHtml(item.allocation)}</strong>
           </div>
           <div class="portfolio-meta">

@@ -12,7 +12,7 @@
     <header class="topbar">
       <div>
         <p class="eyebrow">User portfolio builder</p>
-        <h1>Tailor a card portfolio from a user spend profile.</h1>
+        <h1>Tailor portfolio</h1>
       </div>
       <div class="top-actions">
         <nav class="nav-links" aria-label="Primary navigation">
@@ -30,6 +30,7 @@
               <h2>Spend profile</h2>
               <button class="ghost-button" type="button" id="reset-profile">Reset</button>
             </div>
+            <p class="panel-intro">Add monthly spend only where relevant. Blank fields are ignored.</p>
 
             <label class="field">
               <span>User name</span>
@@ -45,7 +46,7 @@
               </select>
             </label>
 
-            <div class="spend-grid">
+            <div class="spend-grid" aria-label="Monthly spend categories">
               <label class="field">
                 <span>Online shopping</span>
                 <input data-spend="onlineShopping" type="number" min="0" step="50">
