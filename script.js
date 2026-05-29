@@ -146,18 +146,6 @@ const CARD_IMAGES = {
   "citi-smrt": "assets/cards/citi-smrt.webp",
 };
 
-const CARD_IMAGE_FALLBACKS = {
-  "hsbc-revolution": "https://www.hsbc.com.sg/content/dam/hsbc/sg/images/16-9/20219-revo-card-plus-hsbc-ega-debit-card-2000x1125.jpg/jcr:content/renditions/cq5dam.web.1220.1000.jpeg",
-  "citi-rewards": "https://www.citibank.com.sg/content/dam/cgcpc/sg/prelogin/www-citibank-com-sg/image/credit-cards/mc-upgrade/Rewards-card-@2x.png",
-  "dbs-womans-world": "https://www.dbs.com.sg/iwov-resources/images/cards/credit-cards/dbs-woman-world-mastercard-card/prod-comparator-220x140-dbs-womans-world-card.png",
-  "uob-ladys": "https://www.uob.com.sg/assets/web-resources/personal/images/cards/rewards/ladys-card/index/recommended-product-detail-tiles/uob-ladys-card.jpg",
-  "uob-preferred-visa": "https://www.uob.com.sg/assets/web-resources/personal/images/cards/rewards/preferred-platinum-visa-card/masthead/masthead.jpg",
-  "uob-visa-signature": "https://www.uob.com.sg/assets/web-resources/personal/images/cards/index/categorypagefilter/uob-vs.jpg",
-  "krisflyer-uob": "https://www.uob.com.sg/assets/web-resources/personal/images/promotions/cards/sign-up-offers/2-col-tile-stack/sign-up-offer/kf-credit-card.jpg",
-  "ocbc-rewards": "https://www.ocbc.com/iwov-resources/sg/ocbc/personal/img/live/cards/rewards-card/rewardscard-noshadow.png",
-  "citi-smrt": "https://www.citibank.com.sg/content/dam/cgcpc/sg/prelogin/www-citibank-com-sg/image/credit-cards/apple-products/smrt.png",
-};
-
 const selectors = {
   segments: document.querySelectorAll(".segment"),
   search: document.querySelector("#search-input"),
@@ -340,17 +328,12 @@ function cardImageUrl(card) {
   return CARD_IMAGES[card.card_id] || "";
 }
 
-function cardFallbackImageUrl(card) {
-  return CARD_IMAGE_FALLBACKS[card.card_id] || "";
-}
-
 function cardVisualInner(card) {
   const fallback = `<span class="card-bank-code">${escapeHtml(cardBankCode(card))}</span>`;
   const imageUrl = cardImageUrl(card);
   if (!imageUrl) return fallback;
-  const fallbackImageUrl = cardFallbackImageUrl(card);
   return `
-    <img src="${escapeHtml(imageUrl)}" ${fallbackImageUrl ? `data-fallback-src="${escapeHtml(fallbackImageUrl)}"` : ""} alt="${escapeHtml(card.card_name)} card image" loading="lazy" decoding="async" onerror="if (this.dataset.fallbackSrc) { this.src = this.dataset.fallbackSrc; this.dataset.fallbackSrc = ''; } else { this.hidden = true; this.parentElement.classList.add('image-failed'); }">
+    <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(card.card_name)} card image" loading="lazy" decoding="async" onerror="this.hidden = true; this.parentElement.classList.add('image-failed');">
     ${fallback}
   `;
 }
