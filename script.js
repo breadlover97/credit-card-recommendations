@@ -397,7 +397,6 @@ function renderCards(cards) {
     node.setAttribute("tabindex", "-1");
     node.querySelector("h3").textContent = card.card_name;
     node.querySelector(".bank").textContent = `${card.bank} · ${card.category}`;
-    node.querySelector(".tier").textContent = card.recommendation_tier;
 
     node.querySelectorAll("[data-field]").forEach((element) => {
       element.innerHTML = emphasize(card[element.dataset.field] || "Check official terms.");

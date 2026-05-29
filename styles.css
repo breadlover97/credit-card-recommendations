@@ -708,18 +708,6 @@ button {
   margin: 0;
 }
 
-.tier {
-  background: var(--accent-soft);
-  border: 1px solid #c7deda;
-  border-radius: 999px;
-  color: var(--accent);
-  flex: 0 0 auto;
-  font-size: 0.72rem;
-  font-weight: 800;
-  max-width: 46%;
-  padding: 6px 9px;
-}
-
 .facts {
   display: grid;
   gap: 10px;
@@ -927,11 +915,6 @@ summary {
   .actions {
     align-items: stretch;
     flex-direction: column;
-  }
-
-  .tier {
-    max-width: none;
-    width: fit-content;
   }
 
   .facts div {
