@@ -80,28 +80,32 @@ button {
 }
 
 .nav-links {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 999px;
   display: flex;
-  gap: 4px;
-  padding: 4px;
+  gap: 22px;
+  padding: 0;
 }
 
 .nav-links a {
-  border-radius: 999px;
+  border-bottom: 2px solid transparent;
   color: var(--muted);
   font-size: 0.86rem;
-  padding: 8px 12px;
+  font-weight: 750;
+  padding: 8px 0;
   text-decoration: none;
-  transition: background 160ms ease, color 160ms ease;
+  transition: border-color 160ms ease, color 160ms ease;
   white-space: nowrap;
 }
 
 .nav-links a.active,
 .nav-links a:hover {
-  background: var(--ink);
-  color: #fff;
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.nav-links a:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid rgba(20, 32, 38, 0.24);
+  outline-offset: 5px;
 }
 
 .workspace {
