@@ -21,7 +21,6 @@ const tagOptions = [
 ];
 
 const selectors = {
-  sourceStatus: document.querySelector("#source-status"),
   segments: document.querySelectorAll(".segment"),
   search: document.querySelector("#search-input"),
   tagFilters: document.querySelector("#tag-filters"),
@@ -106,15 +105,8 @@ async function hydrateFromSheet() {
       cashback: cashback.length ? cashback : FALLBACK_CARDS.cashback,
     };
 
-    if (selectors.sourceStatus) {
-      selectors.sourceStatus.textContent = "Synced from Google Sheet";
-      selectors.sourceStatus.dataset.state = "sheet";
-    }
   } catch (error) {
-    if (selectors.sourceStatus) {
-      selectors.sourceStatus.textContent = "Using built-in data";
-      selectors.sourceStatus.dataset.state = "fallback";
-    }
+    console.warn("Google Sheet data unavailable; using bundled card data.", error);
   }
 
   render();

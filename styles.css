@@ -71,16 +71,6 @@ button {
   text-transform: uppercase;
 }
 
-.source-pill {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  color: var(--muted);
-  flex: 0 0 auto;
-  font-size: 0.84rem;
-  padding: 10px 14px;
-}
-
 .top-actions {
   align-items: end;
   display: grid;
@@ -112,18 +102,6 @@ button {
 .nav-links a:hover {
   background: var(--ink);
   color: #fff;
-}
-
-.source-pill[data-state="sheet"] {
-  background: var(--accent-soft);
-  border-color: #b7d6ce;
-  color: var(--accent);
-}
-
-.source-pill[data-state="fallback"] {
-  background: var(--warn-soft);
-  border-color: #ecd5a7;
-  color: #7b531b;
 }
 
 .workspace {
