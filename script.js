@@ -223,6 +223,7 @@ async function hydrateFromSheet() {
   }
 
   render();
+  if (selectors.portfolioForm) renderPortfolio();
 }
 
 function allCards() {
@@ -884,5 +885,12 @@ if (selectors.tableWrap && selectors.stickyTableHeader) {
   selectors.tableWrap.addEventListener("scroll", syncStickyTableHeader, { passive: true });
 }
 
+render();
 if (selectors.portfolioForm) renderPortfolio();
-hydrateFromSheet();
+
+const startSheetHydration = () => hydrateFromSheet();
+if ("requestIdleCallback" in window) {
+  window.requestIdleCallback(startSheetHydration, { timeout: 1200 });
+} else {
+  window.setTimeout(startSheetHydration, 0);
+}
