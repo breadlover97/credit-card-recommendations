@@ -294,6 +294,11 @@ function cardAnchor(card) {
   return `card-${card.card_id || card.card_name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`;
 }
 
+function cardReferenceHref(card) {
+  const anchor = cardAnchor(card);
+  return selectors.grid ? `#${anchor}` : `index.html#${anchor}`;
+}
+
 function escapeHtml(text) {
   return String(text || "")
     .replaceAll("&", "&amp;")
@@ -405,7 +410,7 @@ function renderTable() {
     const row = document.createElement("tr");
     row.innerHTML = `
       <th scope="row">
-        <a class="table-card-link" href="#${cardAnchor(card)}">${card.card_name}</a>
+        <a class="table-card-link" href="${cardReferenceHref(card)}">${card.card_name}</a>
         <small class="card-type-text">${card.category}</small>
       </th>
       <td>${emphasize(concise(card.earn_rate))}</td>
