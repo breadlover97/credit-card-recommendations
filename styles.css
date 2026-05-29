@@ -600,13 +600,9 @@ summary {
   background: var(--surface-soft);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  display: none;
+  display: grid;
   gap: 8px;
   padding: 12px;
-}
-
-body.show-advanced .advanced {
-  display: grid;
 }
 
 .links {

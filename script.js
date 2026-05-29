@@ -3,7 +3,6 @@ const appState = {
   category: "miles",
   query: "",
   tag: "",
-  advanced: false,
   lastPortfolio: "",
 };
 
@@ -29,7 +28,6 @@ const selectors = {
   tableBody: document.querySelector("#card-table-body"),
   template: document.querySelector("#card-template"),
   cardsTitle: document.querySelector("#cards-title"),
-  advancedToggle: document.querySelector("#advanced-toggle"),
   portfolioForm: document.querySelector("#portfolio-form"),
   portfolioOutput: document.querySelector("#portfolio-output"),
   downloadPortfolio: document.querySelector("#download-portfolio"),
@@ -497,14 +495,6 @@ if (selectors.search) {
   selectors.search.addEventListener("input", (event) => {
     appState.query = event.target.value.trim();
     render();
-  });
-}
-
-if (selectors.advancedToggle) {
-  selectors.advancedToggle.addEventListener("click", () => {
-    appState.advanced = !appState.advanced;
-    document.body.classList.toggle("show-advanced", appState.advanced);
-    selectors.advancedToggle.textContent = appState.advanced ? "Hide advanced" : "Show advanced";
   });
 }
 
