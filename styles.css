@@ -393,6 +393,13 @@ button {
   gap: 8px;
 }
 
+.portfolio-overview-row {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+}
+
 .portfolio-overview span {
   background: var(--surface-soft);
   border: 1px solid var(--line);
@@ -404,11 +411,6 @@ button {
 
 .portfolio-overview strong {
   color: var(--ink);
-}
-
-.portfolio-toolbar {
-  display: flex;
-  justify-content: flex-end;
 }
 
 .portfolio-grid {
@@ -923,8 +925,9 @@ summary {
     grid-template-columns: 1fr;
   }
 
-  .portfolio-toolbar {
-    justify-content: stretch;
+  .portfolio-overview-row {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .card-head,

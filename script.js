@@ -881,13 +881,13 @@ function renderPortfolio(event) {
       </div>
       <p>${cardCountLabel(items.length)} selected for ${money(profile.totalSpend)} monthly spend.</p>
     </div>
-    <div class="portfolio-overview" aria-label="Portfolio summary">
-      <span><strong>${money(profile.totalSpend)}</strong> monthly spend</span>
-      <span><strong>${escapeHtml(preferenceLabel(profile.preference))}</strong> reward style</span>
-      <span><strong>${cardCountLabel(items.length)}</strong> setup</span>
-      <span><strong>Point quality</strong> included</span>
-    </div>
-    <div class="portfolio-toolbar">
+    <div class="portfolio-overview-row">
+      <div class="portfolio-overview" aria-label="Portfolio summary">
+        <span><strong>${money(profile.totalSpend)}</strong> monthly spend</span>
+        <span><strong>${escapeHtml(preferenceLabel(profile.preference))}</strong> reward style</span>
+        <span><strong>${cardCountLabel(items.length)}</strong> setup</span>
+        <span><strong>Point quality</strong> included</span>
+      </div>
       <button class="ghost-button" type="button" id="portfolio-context-toggle" aria-expanded="${String(appState.portfolioContextOpen)}">
         ${appState.portfolioContextOpen ? "Close all context" : "Open all context"}
       </button>
