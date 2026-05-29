@@ -135,6 +135,18 @@ const REWARD_PROGRAMS = {
 };
 
 const CARD_IMAGES = {
+  "hsbc-revolution": "assets/cards/hsbc-revolution.webp",
+  "citi-rewards": "assets/cards/citi-rewards.webp",
+  "dbs-womans-world": "assets/cards/dbs-womans-world.webp",
+  "uob-ladys": "assets/cards/uob-ladys.webp",
+  "uob-preferred-visa": "assets/cards/uob-preferred-visa.webp",
+  "uob-visa-signature": "assets/cards/uob-visa-signature.webp",
+  "krisflyer-uob": "assets/cards/krisflyer-uob.webp",
+  "ocbc-rewards": "assets/cards/ocbc-rewards.webp",
+  "citi-smrt": "assets/cards/citi-smrt.webp",
+};
+
+const CARD_IMAGE_FALLBACKS = {
   "hsbc-revolution": "https://www.hsbc.com.sg/content/dam/hsbc/sg/images/16-9/20219-revo-card-plus-hsbc-ega-debit-card-2000x1125.jpg/jcr:content/renditions/cq5dam.web.1220.1000.jpeg",
   "citi-rewards": "https://www.citibank.com.sg/content/dam/cgcpc/sg/prelogin/www-citibank-com-sg/image/credit-cards/mc-upgrade/Rewards-card-@2x.png",
   "dbs-womans-world": "https://www.dbs.com.sg/iwov-resources/images/cards/credit-cards/dbs-woman-world-mastercard-card/prod-comparator-220x140-dbs-womans-world-card.png",
@@ -328,20 +340,25 @@ function cardImageUrl(card) {
   return CARD_IMAGES[card.card_id] || "";
 }
 
+function cardFallbackImageUrl(card) {
+  return CARD_IMAGE_FALLBACKS[card.card_id] || "";
+}
+
 function cardVisualInner(card) {
   const fallback = `<span class="card-bank-code">${escapeHtml(cardBankCode(card))}</span>`;
   const imageUrl = cardImageUrl(card);
   if (!imageUrl) return fallback;
+  const fallbackImageUrl = cardFallbackImageUrl(card);
   return `
-    <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(card.card_name)} card image" loading="lazy" decoding="async" onerror="this.hidden=true; this.parentElement.classList.add('image-failed')">
+    <img src="${escapeHtml(imageUrl)}" ${fallbackImageUrl ? `data-fallback-src="${escapeHtml(fallbackImageUrl)}"` : ""} alt="${escapeHtml(card.card_name)} card image" loading="lazy" decoding="async" onerror="if (this.dataset.fallbackSrc) { this.src = this.dataset.fallbackSrc; this.dataset.fallbackSrc = ''; } else { this.hidden = true; this.parentElement.classList.add('image-failed'); }">
     ${fallback}
   `;
 }
 
-function cardVisualHtml(card, className = "") {
+function cardVisualHtml(card, className = "", includeImage = true) {
   return `
     <div class="card-visual ${className}" data-bank="${cardBankKey(card)}" aria-hidden="true">
-      ${cardVisualInner(card)}
+      ${includeImage ? cardVisualInner(card) : `<span class="card-bank-code">${escapeHtml(cardBankCode(card))}</span>`}
     </div>
   `;
 }
@@ -475,7 +492,6 @@ function renderTable() {
     row.innerHTML = `
       <th scope="row">
         <div class="table-card-cell">
-          ${cardVisualHtml(card, "table-card-visual")}
           <div>
             <a class="table-card-link" href="${cardReferenceHref(card)}">${card.card_name}</a>
             <small class="card-type-text">${card.category}</small>
