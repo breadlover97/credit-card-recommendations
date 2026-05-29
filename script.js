@@ -3,6 +3,7 @@ const appState = {
   category: "miles",
   query: "",
   tag: "",
+  definitionsOpen: false,
   lastPortfolio: "",
 };
 
@@ -28,6 +29,7 @@ const selectors = {
   tableBody: document.querySelector("#card-table-body"),
   template: document.querySelector("#card-template"),
   cardsTitle: document.querySelector("#cards-title"),
+  definitionsToggle: document.querySelector("#definitions-toggle"),
   portfolioForm: document.querySelector("#portfolio-form"),
   portfolioOutput: document.querySelector("#portfolio-output"),
   downloadPortfolio: document.querySelector("#download-portfolio"),
@@ -194,6 +196,21 @@ function emphasize(text) {
   return escaped.replace(pattern, "<strong>$1</strong>");
 }
 
+function syncDefinitionPanels() {
+  if (selectors.grid) {
+    selectors.grid.querySelectorAll("details").forEach((details) => {
+      details.open = appState.definitionsOpen;
+    });
+  }
+
+  if (selectors.definitionsToggle) {
+    selectors.definitionsToggle.textContent = appState.definitionsOpen
+      ? "Hide all exclusions/definitions"
+      : "Show all exclusions/definitions";
+    selectors.definitionsToggle.setAttribute("aria-expanded", String(appState.definitionsOpen));
+  }
+}
+
 function renderCards(cards) {
   if (!selectors.grid || !selectors.template || !selectors.cardsTitle) return;
   selectors.grid.innerHTML = "";
@@ -237,6 +254,8 @@ function renderCards(cards) {
 
     selectors.grid.append(node);
   });
+
+  syncDefinitionPanels();
 }
 
 function renderTable() {
@@ -495,6 +514,13 @@ if (selectors.search) {
   selectors.search.addEventListener("input", (event) => {
     appState.query = event.target.value.trim();
     render();
+  });
+}
+
+if (selectors.definitionsToggle) {
+  selectors.definitionsToggle.addEventListener("click", () => {
+    appState.definitionsOpen = !appState.definitionsOpen;
+    syncDefinitionPanels();
   });
 }
 
