@@ -113,6 +113,10 @@ button {
   padding: 0 24px 36px;
 }
 
+.library-workspace {
+  grid-template-columns: 1fr;
+}
+
 .sidebar {
   align-self: start;
   display: grid;
@@ -140,6 +144,17 @@ button {
   color: var(--muted);
   line-height: 1.45;
   margin: 0;
+}
+
+.bottom-cta {
+  align-items: center;
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+}
+
+.bottom-cta > div {
+  max-width: 680px;
 }
 
 .panel h2,
@@ -901,6 +916,7 @@ summary {
 
   .card-head,
   .panel-heading,
+  .bottom-cta,
   .section-heading,
   .actions {
     align-items: stretch;

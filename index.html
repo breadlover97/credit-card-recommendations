@@ -23,33 +23,7 @@
     </header>
 
     <main>
-      <section class="workspace" aria-label="Card recommendation workspace">
-        <aside class="sidebar" aria-label="Controls">
-          <div class="panel">
-            <h2>Browse cards</h2>
-            <div class="segmented" role="tablist" aria-label="Card category">
-              <button class="segment active" type="button" data-category="miles" role="tab" aria-selected="true">Miles</button>
-              <button class="segment" type="button" data-category="cashback" role="tab" aria-selected="false">Cashback</button>
-              <button class="segment" type="button" data-category="all" role="tab" aria-selected="false">All</button>
-            </div>
-            <label class="field">
-              <span>Search</span>
-              <input id="search-input" type="search" autocomplete="off" placeholder="online, dining, UOB, exclusions">
-            </label>
-            <div class="filter-block">
-              <span>Quick filters</span>
-              <div class="chips" id="tag-filters"></div>
-            </div>
-          </div>
-
-          <div class="panel cta-panel">
-            <p class="eyebrow">User workflow</p>
-            <h2>Need a tailored recommendation?</h2>
-            <p>Use the portfolio page when you want to enter a user spend profile and export a short recommendation note.</p>
-            <a class="primary-link" href="portfolio.html">Tailor a portfolio</a>
-          </div>
-        </aside>
-
+      <section class="workspace library-workspace" aria-label="Card recommendation workspace">
         <section class="content">
           <section class="table-section" aria-label="All cards summary table">
             <div class="section-heading">
@@ -83,6 +57,15 @@
               <button class="ghost-button" type="button" id="definitions-toggle" aria-expanded="false">Show all exclusions/definitions</button>
             </div>
             <div class="card-grid" id="card-grid"></div>
+          </section>
+
+          <section class="panel cta-panel bottom-cta">
+            <div>
+              <p class="eyebrow">User workflow</p>
+              <h2>Need a tailored recommendation?</h2>
+              <p>Use the portfolio page when you want to enter a user spend profile and export a short recommendation note.</p>
+            </div>
+            <a class="primary-link" href="portfolio.html">Tailor a portfolio</a>
           </section>
         </section>
       </section>
