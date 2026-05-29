@@ -389,7 +389,7 @@ button {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  overflow: auto;
+  overflow: visible;
 }
 
 .card-table {
@@ -412,13 +412,39 @@ button {
 
 .card-table thead th {
   background: var(--surface-soft);
+  box-shadow: 0 1px 0 var(--line);
   color: var(--muted);
   font-size: 0.74rem;
   font-weight: 850;
   position: sticky;
   text-transform: uppercase;
-  top: 8px;
-  z-index: 5;
+  top: 0;
+  z-index: 20;
+}
+
+.sticky-table-header {
+  border: 1px solid var(--line);
+  border-radius: var(--radius) var(--radius) 0 0;
+  box-shadow: 0 8px 18px rgba(33, 37, 41, 0.08);
+  display: none;
+  left: 0;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  z-index: 80;
+}
+
+.sticky-table-header.visible {
+  display: block;
+}
+
+.sticky-table-header .card-table {
+  background: var(--surface);
+  margin: 0;
+}
+
+.sticky-table-header .card-table thead th {
+  position: static;
 }
 
 .card-table tbody th {
@@ -698,6 +724,10 @@ summary {
 
   .card-table {
     min-width: 860px;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
   }
 
   .workspace {

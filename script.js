@@ -26,6 +26,8 @@ const selectors = {
   tagFilters: document.querySelector("#tag-filters"),
   summary: document.querySelector("#summary-strip"),
   grid: document.querySelector("#card-grid"),
+  tableWrap: document.querySelector(".table-wrap"),
+  stickyTableHeader: document.querySelector("#sticky-table-header"),
   tableBody: document.querySelector("#card-table-body"),
   template: document.querySelector("#card-template"),
   cardsTitle: document.querySelector("#cards-title"),
@@ -211,6 +213,32 @@ function syncDefinitionPanels() {
   }
 }
 
+function syncStickyTableHeader() {
+  if (!selectors.tableWrap || !selectors.stickyTableHeader) return;
+  const table = selectors.tableWrap.querySelector(".card-table");
+  const thead = table?.querySelector("thead");
+  if (!table || !thead) return;
+
+  if (!selectors.stickyTableHeader.firstElementChild) {
+    const clone = table.cloneNode(false);
+    clone.append(thead.cloneNode(true));
+    selectors.stickyTableHeader.append(clone);
+  }
+
+  const headerHeight = thead.getBoundingClientRect().height;
+  const rect = selectors.tableWrap.getBoundingClientRect();
+  const isActive = rect.top < 0 && rect.bottom > headerHeight;
+
+  selectors.stickyTableHeader.classList.toggle("visible", isActive);
+  if (!isActive) return;
+
+  const cloneTable = selectors.stickyTableHeader.querySelector(".card-table");
+  selectors.stickyTableHeader.style.left = `${Math.max(rect.left, 0)}px`;
+  selectors.stickyTableHeader.style.width = `${Math.min(rect.width, window.innerWidth - Math.max(rect.left, 0))}px`;
+  cloneTable.style.width = `${table.scrollWidth}px`;
+  cloneTable.style.transform = `translateX(${-selectors.tableWrap.scrollLeft}px)`;
+}
+
 function renderCards(cards) {
   if (!selectors.grid || !selectors.template || !selectors.cardsTitle) return;
   selectors.grid.innerHTML = "";
@@ -276,6 +304,9 @@ function renderTable() {
     `;
     selectors.tableBody.append(row);
   });
+
+  selectors.stickyTableHeader?.replaceChildren();
+  requestAnimationFrame(syncStickyTableHeader);
 }
 
 function profileValues() {
@@ -547,6 +578,12 @@ if (selectors.returnTop) {
 
   window.addEventListener("scroll", updateTopButton, { passive: true });
   updateTopButton();
+}
+
+if (selectors.tableWrap && selectors.stickyTableHeader) {
+  window.addEventListener("scroll", syncStickyTableHeader, { passive: true });
+  window.addEventListener("resize", syncStickyTableHeader);
+  selectors.tableWrap.addEventListener("scroll", syncStickyTableHeader, { passive: true });
 }
 
 if (selectors.portfolioForm) renderPortfolio();
