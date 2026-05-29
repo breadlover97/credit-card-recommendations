@@ -535,6 +535,17 @@ function rewardQualitySummary(item) {
   return `${reward.program}: ${reward.note} ${reward.expiry}`;
 }
 
+function rewardQualityLabel(item) {
+  const id = item.card.card_id;
+  if (id === "hsbc-revolution" || id === "citi-rewards") return "High flexibility";
+  if (id === "dbs-womans-world") return "Short expiry";
+  if (/^uob-/.test(id)) return "Pooled UNI$";
+  if (id === "krisflyer-uob") return "Simple KrisFlyer";
+  if (id === "ocbc-rewards") return "Broad partners";
+  if (id === "citi-smrt") return "Cashback value";
+  return "Reward quality";
+}
+
 function addRecommendation(items, recommendation) {
   if (!recommendation?.card || items.some((item) => item.card.card_id === recommendation.card.card_id)) return;
   items.push(recommendation);
@@ -730,27 +741,48 @@ function renderPortfolio(event) {
 
   const title = profile.userName ? `${escapeHtml(profile.userName)}'s card portfolio` : "Tailored card portfolio";
   selectors.portfolioOutput.innerHTML = `
-    <div>
-      <p class="eyebrow">Tailored recommendation</p>
-      <h2>${title}</h2>
-      <p>${cardCountLabel(items.length)} selected from ${money(profile.totalSpend)} monthly spend. Preference: ${escapeHtml(preferenceLabel(profile.preference))}${profile.simpleMode ? " · fewer cards" : ""}. Rankings also factor point expiry, transfer partners, pooling and transfer friction.</p>
+    <div class="portfolio-hero">
+      <div>
+        <p class="eyebrow">Tailored recommendation</p>
+        <h2>${title}</h2>
+      </div>
+      <p>${cardCountLabel(items.length)} selected for ${money(profile.totalSpend)} monthly spend.</p>
     </div>
-    <div class="portfolio-summary">
-      <div><strong>${money(profile.totalSpend)}</strong><span>Monthly spend</span></div>
-      <div><strong>${escapeHtml(preferenceLabel(profile.preference))}</strong><span>Reward style</span></div>
-      <div><strong>${cardCountLabel(items.length)}</strong><span>Suggested setup</span></div>
-      <div><strong>Point quality</strong><span>Expiry, partners, pooling</span></div>
+    <div class="portfolio-overview" aria-label="Portfolio summary">
+      <span><strong>${money(profile.totalSpend)}</strong> monthly spend</span>
+      <span><strong>${escapeHtml(preferenceLabel(profile.preference))}</strong> reward style</span>
+      <span><strong>${cardCountLabel(items.length)}</strong> setup</span>
+      <span><strong>Point quality</strong> included</span>
     </div>
     <div class="portfolio-grid">
       ${items.map((item) => `
-        <article class="portfolio-item">
-          <p class="portfolio-role">Priority ${item.rank} · ${escapeHtml(item.priority)} · ${escapeHtml(item.role)}</p>
+        <article class="portfolio-item ${item.rank <= 2 ? "featured" : ""}">
+          <div class="portfolio-item-top">
+            <span class="rank-badge">${String(item.rank).padStart(2, "0")}</span>
+            <span class="priority-badge">${escapeHtml(item.priority)}</span>
+          </div>
           <h3>${escapeHtml(item.card.card_name)}</h3>
-          <p><strong>Use for:</strong> ${escapeHtml(item.allocation)}</p>
-          <p><strong>Why:</strong> ${escapeHtml(item.why)}</p>
-          <p><strong>Reward quality:</strong> ${escapeHtml(rewardQualitySummary(item))}</p>
-          <p><strong>Transfer/expiry:</strong> ${escapeHtml(`${item.reward.partnerCount}; ${item.reward.pooling}; ${item.reward.friction}`)}</p>
-          <p><strong>Watch:</strong> ${escapeHtml(item.caution)}</p>
+          <p class="portfolio-role">${escapeHtml(item.role)}</p>
+          <div class="portfolio-use">
+            <span>Use this for</span>
+            <strong>${escapeHtml(item.allocation)}</strong>
+          </div>
+          <div class="portfolio-meta">
+            <div>
+              <span>Reward quality</span>
+              <strong>${escapeHtml(rewardQualityLabel(item))}</strong>
+            </div>
+            <div>
+              <span>Watch</span>
+              <strong>${escapeHtml(concise(item.caution))}</strong>
+            </div>
+          </div>
+          <details class="portfolio-details">
+            <summary>More context</summary>
+            <p><strong>Why:</strong> ${escapeHtml(item.why)}</p>
+            <p><strong>Points:</strong> ${escapeHtml(rewardQualitySummary(item))}</p>
+            <p><strong>Transfer/expiry:</strong> ${escapeHtml(`${item.reward.partnerCount}; ${item.reward.pooling}; ${item.reward.friction}`)}</p>
+          </details>
         </article>
       `).join("")}
     </div>
