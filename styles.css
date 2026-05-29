@@ -147,8 +147,7 @@ button {
 .portfolio-output,
 .card,
 .table-wrap,
-.cta-panel,
-.site-hero {
+.cta-panel {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -167,47 +166,6 @@ button {
   font-size: 0.9rem;
   line-height: 1.42;
   margin: -6px 0 0;
-}
-
-.site-hero {
-  align-items: end;
-  display: flex;
-  gap: 24px;
-  justify-content: space-between;
-  overflow: hidden;
-  padding: clamp(28px, 5vw, 64px);
-  position: relative;
-}
-
-.site-hero h2 {
-  font-size: clamp(2rem, 5vw, 4.8rem);
-  letter-spacing: 0;
-  line-height: 0.98;
-  margin: 0;
-  max-width: 980px;
-}
-
-.site-hero p:not(.eyebrow) {
-  color: var(--muted);
-  font-size: clamp(1rem, 1.4vw, 1.18rem);
-  line-height: 1.45;
-  margin: 18px 0 0;
-  max-width: 690px;
-}
-
-.hero-actions {
-  display: flex;
-  flex: 0 0 auto;
-  gap: 10px;
-}
-
-.text-link {
-  align-items: center;
-  color: var(--accent);
-  display: inline-flex;
-  font-weight: 760;
-  min-height: 42px;
-  text-decoration: none;
 }
 
 .cta-panel p:not(.eyebrow) {
@@ -1141,26 +1099,6 @@ details[open] > summary::after {
   .nav-links {
     max-width: 100%;
     overflow-x: auto;
-  }
-
-  .site-hero {
-    align-items: start;
-    flex-direction: column;
-    padding: 28px 18px;
-  }
-
-  .site-hero h2 {
-    font-size: clamp(2.2rem, 12vw, 3.6rem);
-  }
-
-  .hero-actions {
-    width: 100%;
-  }
-
-  .hero-actions .primary-link,
-  .hero-actions .text-link {
-    flex: 1;
-    justify-content: center;
   }
 
   .card-table {
