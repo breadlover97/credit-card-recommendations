@@ -453,16 +453,6 @@ button {
   font-weight: 900;
 }
 
-.priority-badge {
-  background: var(--accent-soft);
-  border: 1px solid #c7deda;
-  border-radius: 999px;
-  color: var(--accent);
-  font-size: 0.72rem;
-  font-weight: 850;
-  padding: 5px 9px;
-}
-
 .portfolio-item h3 {
   font-size: 1.08rem;
   line-height: 1.15;
@@ -1083,15 +1073,6 @@ summary {
   .print-card-head span {
     color: #8a999e;
     font-weight: 900;
-  }
-
-  .print-card-head b {
-    background: #e6f1ee;
-    border: 1px solid #c7deda;
-    border-radius: 999px;
-    color: #23615a;
-    font-size: 8pt;
-    padding: 3px 7px;
   }
 
   .print-card h3 {

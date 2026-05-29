@@ -609,10 +609,10 @@ function addRecommendation(items, recommendation) {
   items.push(recommendation);
 }
 
-function recommendation(id, score, role, why, allocation, caution, priority = "Core") {
+function recommendation(id, score, role, why, allocation, caution) {
   const card = findCard(id);
   if (!card) return null;
-  return { card, score, role, why, allocation, caution, priority };
+  return { card, score, role, why, allocation, caution };
 }
 
 function buildPortfolio(profile) {
@@ -644,8 +644,7 @@ function buildPortfolio(profile) {
       clearsMinimum
         ? `Put about ${money(Math.min(cashbackSpend, 1200))} of groceries, online shopping, overseas in-person or commute spend here.`
         : "Use only if the user can reliably reach S$500 statement-month spend; otherwise keep this as optional.",
-      "Do not count wallet top-ups or travel-related online transactions towards bonus cashback.",
-      wantsCashback ? "Core" : "Optional"
+      "Do not count wallet top-ups or travel-related online transactions towards bonus cashback."
     ));
   }
 
@@ -657,8 +656,7 @@ function buildPortfolio(profile) {
         "First online bucket",
         "Strong first card for online shopping, food delivery and ride-hailing-style spend. Travel bookings are kept out of this bucket.",
         `Put the first ${money(Math.min(onlineRetail, 1000))} of eligible online retail-style spend here each statement month.`,
-        "Avoid flights, hotels, OTAs, mobile-wallet routes and wallet top-ups.",
-        "Core"
+        "Avoid flights, hotels, OTAs, mobile-wallet routes and wallet top-ups."
       ));
     }
 
@@ -670,8 +668,7 @@ function buildPortfolio(profile) {
         "Online travel / overflow",
         "Useful for hotel, OTA and other online travel-style spend that should not be treated as generic online shopping.",
         `Put up to ${money(dbsTarget || 1000)} of online travel, hotels, OTAs, overseas online or online overflow here each calendar month.`,
-        "DBS Points from this card have short expiry; check merchant coding for bonus eligibility.",
-        onlineRetail > 0 ? "Add-on" : "Core"
+        "DBS Points from this card have short expiry; check merchant coding for bonus eligibility."
       ));
     }
 
@@ -684,8 +681,7 @@ function buildPortfolio(profile) {
         "Everyday mobile contactless",
         "Best default for Apple Pay/Google Pay/Samsung Pay taps, with a separate selected-online bucket.",
         `Use up to ${money(600)} mobile contactless plus up to ${money(600)} selected online each calendar month.`,
-        "Physical card tap does not count for the mobile-contactless bucket; hotel/OTA online spend may be better treated separately.",
-        "Core"
+        "Physical card tap does not count for the mobile-contactless bucket; hotel/OTA online spend may be better treated separately."
       ));
     }
 
@@ -700,8 +696,7 @@ function buildPortfolio(profile) {
         `${category.label} category card`,
         `Best dedicated category card because ${category.label.toLowerCase()} is one of the user's larger recurring spend buckets.`,
         `Set the quarterly category to ${category.category} and route up to ${money(Math.min(category.value, 1000))}/month if MCC fit is clean.`,
-        "Category is MCC-based; actual merchant code matters more than the user's intention.",
-        categoryDominatesSpend ? "Core" : "Add-on"
+        "Category is MCC-based; actual merchant code matters more than the user's intention."
       ));
     }
 
@@ -713,8 +708,7 @@ function buildPortfolio(profile) {
         "High-spend threshold bucket",
         `Good fit when the user can clear the S$1,000 ${bucket} bucket minimum.`,
         `Use for ${bucket} months where spend is at least S$1,000 and ideally near the S$1,200 cap.`,
-        "Skip this card when the relevant bucket is below S$1,000; the earn rate becomes much weaker.",
-        "Conditional"
+        "Skip this card when the relevant bucket is below S$1,000; the earn rate becomes much weaker."
       ));
     }
 
@@ -725,8 +719,7 @@ function buildPortfolio(profile) {
         "Promo shopping layer",
         "Useful for listed shopping platforms while the 6 mpd promo remains available.",
         "Use for Watsons, Shopee, Lazada, Taobao, TikTok Shop and selected retail categories.",
-        "Promo and merchant list are date-sensitive; recheck current OCBC terms before relying on it.",
-        "Optional"
+        "Promo and merchant list are date-sensitive; recheck current OCBC terms before relying on it."
       ));
     }
 
@@ -737,8 +730,7 @@ function buildPortfolio(profile) {
         "Simple direct-KrisFlyer fallback",
         "Good fit when the user wants fewer cards or regularly exceeds specialised 4 mpd caps.",
         "Use after specialised caps are filled, or as the main card when simplicity matters more than maximum earn rate.",
-        "Requires S$1,000 annual SIA Group spend to unlock accelerated everyday categories.",
-        simpleMode ? "Core" : "Overflow"
+        "Requires S$1,000 annual SIA Group spend to unlock accelerated everyday categories."
       ));
     }
 
@@ -748,15 +740,13 @@ function buildPortfolio(profile) {
       "Flexible starter / gap filler",
       "Good bridge card for eligible everyday online/contactless categories, including travel gaps when HSBC recognises the category.",
       "Use for eligible HSBC online/contactless bonus categories after more specialised buckets are assigned.",
-      "Check HSBC selected categories and EGA conditions before assuming the highest earn rate.",
-      "Optional"
+      "Check HSBC selected categories and EGA conditions before assuming the highest earn rate."
     ));
   }
 
-  const priorityWeight = { Core: 0, "Add-on": 1, Conditional: 2, Optional: 3, Overflow: 4 };
   const ranked = applyRewardQuality(candidates, profile)
     .filter((item) => item.score > 0)
-    .sort((a, b) => (priorityWeight[a.priority] ?? 9) - (priorityWeight[b.priority] ?? 9) || b.score - a.score);
+    .sort((a, b) => b.score - a.score);
 
   ranked.forEach((item) => addRecommendation(items, item));
 
@@ -771,7 +761,7 @@ function portfolioMarkdown(profile, items) {
     .map(([key, value]) => `- ${spendLabel(key)}: ${money(value)}`);
 
   const cardLines = items.map((item, index) => [
-    `${index + 1}. ${item.card.card_name} (${item.priority}: ${item.role})`,
+    `${index + 1}. ${item.card.card_name} (${item.role})`,
     `   - Use for: ${item.allocation}`,
     `   - Why: ${item.why}`,
     `   - Reward quality: ${rewardQualitySummary(item)}`,
@@ -849,7 +839,6 @@ function printReportHtml(profile, items) {
           <article class="print-card">
             <div class="print-card-head">
               <span>${String(item.rank).padStart(2, "0")}</span>
-              <b>${escapeHtml(item.priority)}</b>
             </div>
             <h3>${escapeHtml(item.card.card_name)}</h3>
             <p class="print-role">${escapeHtml(item.role)}</p>
@@ -938,7 +927,6 @@ function renderPortfolio(event) {
         <article class="portfolio-item ${item.rank <= 2 ? "featured" : ""}">
           <div class="portfolio-item-top">
             <span class="rank-badge">${String(item.rank).padStart(2, "0")}</span>
-            <span class="priority-badge">${escapeHtml(item.priority)}</span>
           </div>
           <h3>${escapeHtml(item.card.card_name)}</h3>
           <p class="portfolio-role">${escapeHtml(item.role)}</p>
