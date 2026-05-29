@@ -690,14 +690,18 @@ function buildPortfolio(profile) {
     }
 
     if (category?.value >= 300) {
+      const categoryDominatesSpend = category.value >= 500 || category.value >= totalSpend * 0.45;
+      const categoryScore = Math.min(category.value, 1000) * (categoryDominatesSpend ? 1.45 : 1.15)
+        + (category.value >= 600 ? 160 : 0)
+        + (categoryDominatesSpend ? 180 : 0);
       candidates.push(recommendation(
         "uob-ladys",
-        Math.min(category.value, 1000) * 1.15 + (category.value >= 600 ? 160 : 0),
+        categoryScore,
         `${category.label} category card`,
         `Best dedicated category card because ${category.label.toLowerCase()} is one of the user's larger recurring spend buckets.`,
         `Set the quarterly category to ${category.category} and route up to ${money(Math.min(category.value, 1000))}/month if MCC fit is clean.`,
         "Category is MCC-based; actual merchant code matters more than the user's intention.",
-        "Add-on"
+        categoryDominatesSpend ? "Core" : "Add-on"
       ));
     }
 
