@@ -406,6 +406,11 @@ button {
   color: var(--ink);
 }
 
+.portfolio-toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .portfolio-grid {
   display: grid;
   gap: 14px;
@@ -912,6 +917,10 @@ summary {
 
   .portfolio-meta {
     grid-template-columns: 1fr;
+  }
+
+  .portfolio-toolbar {
+    justify-content: stretch;
   }
 
   .card-head,

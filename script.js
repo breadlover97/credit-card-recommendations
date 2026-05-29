@@ -4,6 +4,7 @@ const appState = {
   query: "",
   tag: "",
   definitionsOpen: false,
+  portfolioContextOpen: false,
   lastPortfolio: "",
 };
 
@@ -327,6 +328,20 @@ function syncDefinitionPanels() {
       ? "Hide all exclusions/definitions"
       : "Show all exclusions/definitions";
     selectors.definitionsToggle.setAttribute("aria-expanded", String(appState.definitionsOpen));
+  }
+}
+
+function syncPortfolioContextPanels() {
+  if (!selectors.portfolioOutput) return;
+  const detailsPanels = selectors.portfolioOutput.querySelectorAll(".portfolio-details");
+  detailsPanels.forEach((details) => {
+    details.open = appState.portfolioContextOpen;
+  });
+
+  const toggle = selectors.portfolioOutput.querySelector("#portfolio-context-toggle");
+  if (toggle) {
+    toggle.textContent = appState.portfolioContextOpen ? "Close all context" : "Open all context";
+    toggle.setAttribute("aria-expanded", String(appState.portfolioContextOpen));
   }
 }
 
@@ -779,6 +794,11 @@ function renderPortfolio(event) {
       <span><strong>${cardCountLabel(items.length)}</strong> setup</span>
       <span><strong>Point quality</strong> included</span>
     </div>
+    <div class="portfolio-toolbar">
+      <button class="ghost-button" type="button" id="portfolio-context-toggle" aria-expanded="${String(appState.portfolioContextOpen)}">
+        ${appState.portfolioContextOpen ? "Close all context" : "Open all context"}
+      </button>
+    </div>
     <div class="portfolio-grid">
       ${items.map((item) => `
         <article class="portfolio-item ${item.rank <= 2 ? "featured" : ""}">
@@ -812,6 +832,7 @@ function renderPortfolio(event) {
       `).join("")}
     </div>
   `;
+  syncPortfolioContextPanels();
 }
 
 function downloadPortfolio() {
@@ -871,6 +892,14 @@ if (selectors.definitionsToggle) {
 
 if (selectors.portfolioForm) {
   selectors.portfolioForm.addEventListener("submit", renderPortfolio);
+}
+
+if (selectors.portfolioOutput) {
+  selectors.portfolioOutput.addEventListener("click", (event) => {
+    if (event.target.id !== "portfolio-context-toggle") return;
+    appState.portfolioContextOpen = !appState.portfolioContextOpen;
+    syncPortfolioContextPanels();
+  });
 }
 
 if (selectors.downloadPortfolio) {
