@@ -761,7 +761,7 @@ button {
 }
 
 .card-head {
-  align-items: start;
+  align-items: center;
   justify-content: start;
 }
 
@@ -774,12 +774,12 @@ button {
   box-shadow: none;
   color: #fff;
   display: flex;
-  flex: 0 0 118px;
+  flex: 0 0 134px;
   justify-content: center;
   overflow: visible;
   padding: 0;
   transition: transform 220ms ease;
-  width: 118px;
+  width: 134px;
 }
 
 .card-visual img {
@@ -1161,13 +1161,13 @@ details[open] > summary::after {
   }
 
   .card-visual {
-    flex: 0 0 92px;
-    padding: 10px;
-    width: 92px;
+    flex: 0 0 110px;
+    padding: 0;
+    width: 110px;
   }
 
   .card-head {
-    align-items: flex-start;
+    align-items: center;
     flex-direction: row;
   }
 
