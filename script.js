@@ -975,10 +975,12 @@ function renderPortfolio(event) {
       ${items.map((item) => `
         <article class="portfolio-item ${item.rank <= 2 ? "featured" : ""}">
           <div class="portfolio-item-top">
-            <span class="rank-badge">${String(item.rank).padStart(2, "0")}</span>
+            <div class="portfolio-title">
+              <span class="rank-badge">${String(item.rank).padStart(2, "0")}</span>
+              <h3>${escapeHtml(item.card.card_name)}</h3>
+            </div>
             ${cardVisualHtml(item.card, "mini-card-visual")}
           </div>
-          <h3>${escapeHtml(item.card.card_name)}</h3>
           <div class="portfolio-use">
             <span>${escapeHtml(item.role)}</span>
             <strong>${escapeHtml(item.allocation)}</strong>

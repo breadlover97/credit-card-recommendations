@@ -485,8 +485,14 @@ button {
 .portfolio-item-top {
   align-items: center;
   display: flex;
-  gap: 12px;
+  gap: 14px;
   justify-content: space-between;
+}
+
+.portfolio-title {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
 }
 
 .rank-badge {
@@ -496,7 +502,7 @@ button {
 }
 
 .portfolio-item h3 {
-  font-size: 1.08rem;
+  font-size: 1.12rem;
   line-height: 1.15;
   margin: 0;
 }
@@ -844,9 +850,9 @@ button {
 }
 
 .mini-card-visual {
-  flex-basis: 74px;
-  padding: 8px;
-  width: 74px;
+  flex: 0 0 104px;
+  padding: 0;
+  width: 104px;
 }
 
 .mini-card-visual .card-bank-code {
@@ -1172,7 +1178,8 @@ details[open] > summary::after {
   }
 
   .mini-card-visual {
-    width: 72px;
+    flex-basis: 88px;
+    width: 88px;
   }
 
   .table-card-visual {
