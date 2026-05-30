@@ -934,14 +934,9 @@ function renderPortfolio(event) {
   appState.lastPortfolioProfile = profile;
   appState.lastPortfolioItems = items;
 
-  const title = profile.userName ? `${escapeHtml(profile.userName)}'s card portfolio` : "Tailored card portfolio";
   if (profile.totalSpend <= 0) {
     selectors.portfolioOutput.innerHTML = `
       <div class="portfolio-hero">
-        <div>
-          <p class="eyebrow">Tailored recommendation</p>
-          <h2>Build a cleaner card setup.</h2>
-        </div>
         <p>Enter the user's monthly spend and the best-fit cards will appear here.</p>
       </div>
       <div class="portfolio-overview" aria-label="Portfolio summary">
@@ -954,10 +949,6 @@ function renderPortfolio(event) {
 
   selectors.portfolioOutput.innerHTML = `
     <div class="portfolio-hero">
-      <div>
-        <p class="eyebrow">Tailored recommendation</p>
-        <h2>${title}</h2>
-      </div>
       <p>${cardCountLabel(items.length)} selected from ${money(profile.totalSpend)} monthly spend.</p>
     </div>
     <div class="portfolio-overview-row">
