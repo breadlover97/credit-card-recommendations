@@ -203,6 +203,16 @@ button {
   justify-content: space-between;
 }
 
+.panel-heading > div,
+.section-heading > div,
+.bottom-cta > div,
+.portfolio-hero > div,
+.portfolio-title,
+.portfolio-use,
+.portfolio-meta div {
+  min-width: 0;
+}
+
 .segmented {
   background: rgba(118, 118, 128, 0.12);
   border: 1px solid var(--line);
@@ -405,7 +415,7 @@ button {
 }
 
 .portfolio-hero {
-  align-items: end;
+  align-items: start;
   border-bottom: 1px solid var(--line);
   display: flex;
   gap: 18px;
@@ -420,9 +430,11 @@ button {
 
 .portfolio-hero > p {
   color: var(--muted);
+  flex: 1 1 auto;
   line-height: 1.45;
-  max-width: 280px;
-  text-align: right;
+  max-width: none;
+  text-align: left;
+  width: 100%;
 }
 
 .portfolio-overview {
@@ -1137,11 +1149,6 @@ details[open] > summary::after {
   .portfolio-hero {
     align-items: start;
     flex-direction: column;
-  }
-
-  .portfolio-hero > p {
-    max-width: none;
-    text-align: left;
   }
 
   .portfolio-meta {
