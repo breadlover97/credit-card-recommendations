@@ -284,7 +284,7 @@ const FALLBACK_CARDS = {
       "official_terms_url": "https://www.citibank.com.sg/credit-cards/cashback/smrt-credit-card/pdf/citi-smrt-rewards-program.pdf",
       "official_rewards_or_exclusions_url": "https://www.citibank.com.sg/credit-cards/cashback/smrt-credit-card/pdf/citi-smrt-rewards-program.pdf",
       "research_reference_1": "https://www.singsaver.com.sg/credit-card/products/citi-smrt-card",
-      "research_reference_2": "https://www.moneysmart.sg/credit-cards/citi-smrt-card",
+      "research_reference_2": "https://thefinance.sg/2026/02/21/updated-citi-smrt-review/",
       "last_verified": "2026-05-29",
       "data_confidence": "High; official Citi SMRT page and SMRT$ rewards terms reviewed 2026-05-29.",
       "site_tags": "cashback,groceries,online,transport,myr,citi"
